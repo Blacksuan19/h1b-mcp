@@ -23,6 +23,7 @@ structured evidence.
 - Parsed annual LCA approval and denial rates.
 - Parsed annual USCIS H-1B approvals and denial counts.
 - Parsed annual USCIS approval and denial rates.
+- Local company-profile cache so repeated checks can reuse parsed H1BGrader data.
 - Typed Pydantic response models that are easy for agents to consume.
 - Browser-block aware behavior that returns `Blocked` instead of inventing a
   sponsor conclusion.
@@ -159,12 +160,14 @@ Example response shape:
 
 ## How It Works
 
-1. Opens `https://h1bgrader.com/` in SeleniumBase UC mode.
-2. Searches the company name in the H1BGrader company search box.
-3. Selects the best dropdown result and navigates to the company profile.
-4. Parses the company profile HTML with Beautiful Soup.
-5. Extracts LCA and USCIS approval/denial tables into typed models.
-6. Builds a compact sponsorship signal with evidence and caveats.
+1. Checks the local company-profile cache for a fresh match.
+2. Opens `https://h1bgrader.com/` in SeleniumBase UC mode when a fresh fetch is needed.
+3. Searches the company name in the H1BGrader company search box.
+4. Selects the best dropdown result and navigates to the company profile.
+5. Parses the company profile HTML with Beautiful Soup.
+6. Extracts LCA and USCIS approval/denial tables into typed models.
+7. Stores the parsed company profile locally for later tool calls.
+8. Builds a compact sponsorship signal with evidence and caveats.
 
 ## Signals
 
@@ -182,21 +185,21 @@ H1BGrader may still present human verification, rate limits, or other bot
 protection. When that happens, `h1b-mcp` returns a `Blocked` result with a
 caveat instead of making a claim from memory.
 
-The browser profile is stored at:
+The browser profile and company cache are stored at:
 
 ```text
 ~/.h1b-mcp/browser-profile
+~/.h1b-mcp/cache/company-profiles
 ```
 
 ## Current Scope
 
-This project currently performs live single-company lookups only. It does not
-ship a local employer database, bulk scrape H1BGrader, or cache company profiles
-yet.
+This project currently performs single-company lookups and caches the parsed
+company profiles locally. It does not ship a bundled employer database or bulk
+scrape H1BGrader.
 
 ## Roadmap
 
-- Company-level profile cache so multiple tools can reuse the same fetched page.
 - Company profile tool that returns the parsed LCA and USCIS tables directly.
 - Job-title tab parsing for company roles and salaries.
 - Search by job title across companies, where the live site supports it.

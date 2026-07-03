@@ -3,9 +3,7 @@ name = "h1b-mcp"
 version = "0.1.1"
 description = "A live browser-based MCP server for checking H1BGrader sponsorship signals."
 readme = "README.md"
-authors = [
-    { name = "blacksuan19", email = "abubakaryagob@gmail.com" }
-]
+authors = [{ name = "blacksuan19", email = "abubakaryagob@gmail.com" }]
 license = "MIT"
 license-files = ["LICENSE"]
 requires-python = ">=3.11"
@@ -22,11 +20,7 @@ classifiers = [
     "Topic :: Software Development :: Libraries :: Python Modules",
     "Typing :: Typed",
 ]
-dependencies = [
-    "beautifulsoup4>=4.15.0",
-    "mcp>=1.28.1",
-    "seleniumbase>=4.50.5",
-]
+dependencies = ["beautifulsoup4>=4.15.0", "mcp>=1.28.1", "seleniumbase>=4.50.5"]
 
 [project.urls]
 Homepage = "https://github.com/Blacksuan19/h1b-mcp"
@@ -52,8 +46,8 @@ dev = [
 current_version = "0.1.1"
 version_pattern = "MAJOR.MINOR.PATCH"
 commit_message = "chore: bump version {old_version} -> {new_version}"
-commit = false
-tag = false
+commit = true
+tag = true
 push = false
 
 [tool.bumpver.file_patterns]

@@ -1,5 +1,13 @@
+import asyncio
+from datetime import UTC, datetime, timedelta
+from pathlib import Path
+
+from h1b_mcp.cache import CompanyProfileCache
+from h1b_mcp.models import CompanyProfile
 from h1b_mcp.parsers.summary import summarize_h1bgrader_profile
 from h1b_mcp.parsers.tables import parse_h1bgrader_profile
+from h1b_mcp.service import H1BGraderService
+from h1b_mcp.settings import Settings
 from h1b_mcp.utils import (
     best_company_match,
     is_challenge_page,
@@ -64,6 +72,59 @@ DATABRICKS_PROFILE_HTML = """
   </body>
 </html>
 """
+
+
+class FakeProfileFetcher:
+    def __init__(self, profile: CompanyProfile) -> None:
+        self.profile = profile
+        self.calls: list[str] = []
+        self.logger: object | None = None
+
+    async def fetch_company_profile(
+        self,
+        company_name: str,
+        *,
+        logger: object | None = None,
+    ) -> CompanyProfile:
+        self.calls.append(company_name)
+        self.logger = logger
+        return self.profile
+
+
+class FakeLogSink:
+    def __init__(self) -> None:
+        self.messages: list[tuple[str, str]] = []
+
+    async def debug(self, message: str) -> None:
+        self.messages.append(("debug", message))
+
+    async def info(self, message: str) -> None:
+        self.messages.append(("info", message))
+
+    async def warning(self, message: str) -> None:
+        self.messages.append(("warning", message))
+
+    async def error(self, message: str) -> None:
+        self.messages.append(("error", message))
+
+
+def cache_settings(tmp_path: Path, *, cache_ttl_seconds: int = 60 * 60) -> Settings:
+    return Settings(
+        profile_dir=tmp_path / "browser-profile",
+        cache_dir=tmp_path / "company-cache",
+        cache_ttl_seconds=cache_ttl_seconds,
+    )
+
+
+def databricks_company_profile(*, fetched_at: datetime | None = None) -> CompanyProfile:
+    return CompanyProfile(
+        company_query="Databricks",
+        matched_company="DATABRICKS INC",
+        url=DATABRICKS_PROFILE_URL,
+        fetched_at=fetched_at or datetime.now(UTC),
+        sponsor_status="sponsors",
+        profile=parse_h1bgrader_profile(DATABRICKS_PROFILE_HTML),
+    )
 
 
 def test_normalize_company_name_removes_common_suffixes() -> None:
@@ -196,6 +257,64 @@ def test_parse_h1bgrader_profile_extracts_lca_tables() -> None:
         {"fiscal_year": 2025, "approval_rate": 100.0, "denial_rate": 0.0},
         {"fiscal_year": 2023, "approval_rate": 98.04, "denial_rate": 1.96},
     ]
+
+
+def test_company_profile_cache_reads_by_company_alias(tmp_path: Path) -> None:
+    cache = CompanyProfileCache(cache_settings(tmp_path))
+    profile = databricks_company_profile()
+
+    cache.set(profile)
+
+    cached_profile = cache.get("Databricks Inc")
+    assert cached_profile is not None
+    assert cached_profile.matched_company == "DATABRICKS INC"
+    assert cached_profile.profile.lca_approvals[0].counts["certified"] == 173
+
+
+def test_company_profile_cache_ignores_stale_entries(tmp_path: Path) -> None:
+    settings = cache_settings(tmp_path, cache_ttl_seconds=60)
+    cache = CompanyProfileCache(settings)
+    stale_profile = databricks_company_profile(fetched_at=datetime.now(UTC) - timedelta(hours=2))
+
+    cache.set(stale_profile)
+
+    assert cache.get("Databricks") is None
+
+
+def test_service_reuses_cached_company_profile(tmp_path: Path) -> None:
+    async def run_check() -> None:
+        settings = cache_settings(tmp_path)
+        fetcher = FakeProfileFetcher(databricks_company_profile())
+        service = H1BGraderService(settings, client=fetcher)
+
+        first_result = await service.check_company("Databricks")
+        second_result = await service.check_company("Databricks Inc")
+
+        assert fetcher.calls == ["Databricks"]
+        assert first_result.signal == "Strong signal"
+        assert second_result.signal == "Strong signal"
+        assert second_result.matched_company == "DATABRICKS INC"
+
+    asyncio.run(run_check())
+
+
+def test_service_logs_cache_and_fetch_steps(tmp_path: Path) -> None:
+    async def run_check() -> None:
+        settings = cache_settings(tmp_path)
+        logger = FakeLogSink()
+        fetcher = FakeProfileFetcher(databricks_company_profile())
+        service = H1BGraderService(settings, client=fetcher)
+
+        await service.check_company("Databricks", logger=logger)
+
+        messages = [message for _, message in logger.messages]
+        assert fetcher.logger is logger
+        assert "Checking local company-profile cache." in messages
+        assert "No fresh cache entry found; starting live lookup." in messages
+        assert "Caching parsed H1BGrader company profile." in messages
+        assert "Building sponsorship signal from company profile." in messages
+
+    asyncio.run(run_check())
 
 
 def test_summarize_profile_classifies_no_sponsor() -> None:
