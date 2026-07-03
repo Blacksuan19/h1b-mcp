@@ -1,0 +1,75 @@
+[project]
+name = "h1b-mcp"
+version = "0.1.1"
+description = "A live browser-based MCP server for checking H1BGrader sponsorship signals."
+readme = "README.md"
+authors = [
+    { name = "blacksuan19", email = "abubakaryagob@gmail.com" }
+]
+license = "MIT"
+license-files = ["LICENSE"]
+requires-python = ">=3.11"
+keywords = ["h1b", "mcp", "codex", "seleniumbase", "visa", "sponsorship"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Internet :: WWW/HTTP :: Browsers",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Typing :: Typed",
+]
+dependencies = [
+    "beautifulsoup4>=4.15.0",
+    "mcp>=1.28.1",
+    "seleniumbase>=4.50.5",
+]
+
+[project.urls]
+Homepage = "https://github.com/Blacksuan19/h1b-mcp"
+Repository = "https://github.com/Blacksuan19/h1b-mcp"
+Issues = "https://github.com/Blacksuan19/h1b-mcp/issues"
+
+[project.scripts]
+h1b-mcp = "h1b_mcp.server:main"
+
+[build-system]
+requires = ["uv_build>=0.11.26,<0.12.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "bumpver>=2026.1132",
+    "pyright>=1.1.411",
+    "pytest>=9.1.1",
+    "ruff>=0.15.20",
+]
+
+[tool.bumpver]
+current_version = "0.1.1"
+version_pattern = "MAJOR.MINOR.PATCH"
+commit_message = "chore: bump version {old_version} -> {new_version}"
+commit = false
+tag = false
+push = false
+
+[tool.bumpver.file_patterns]
+"pyproject.toml" = [
+    'current_version = "MAJOR.MINOR.PATCH"',
+    'version = "MAJOR.MINOR.PATCH"',
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+
+[tool.pyright]
+pythonVersion = "3.11"
+typeCheckingMode = "standard"
+include = ["src", "tests"]
