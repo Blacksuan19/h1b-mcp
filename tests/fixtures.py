@@ -1,0 +1,132 @@
+from datetime import UTC, datetime
+from pathlib import Path
+
+from h1b_mcp.constants import COMPANY_PROFILE_CACHE_SCHEMA_VERSION
+from h1b_mcp.models import CompanyProfile
+from h1b_mcp.parsers.tables import parse_h1bgrader_profile
+from h1b_mcp.settings import Settings
+
+DATABRICKS_PROFILE_URL = "https://h1bgrader.com/h1b-sponsors/databricks-inc-nokpn1vn04"
+DATABRICKS_PROFILE_TEXT = (
+    "Databricks INC H1B Sponsorship Data "
+    "Yes, Databricks INC sponsors H1B visas. "
+    "H1B LCA Approvals, Denials Fiscal Year* Certified Certified Withd. "
+    "Withdrawn Denied 2026 173 - 1 - 2025 376 9 - - 2024 292 33 1 - "
+    "2023 211 26 1 - 2022 241 4 - - 2021 170 2 3 - 2020 68 3 - - "
+    "2019 64 4 2 1 2018 39 4 3 - 2017 38 7 - - "
+    "H1B LCA Approval & Denial Rates Fiscal Year* Approval (%) Denial (%) "
+    "2026 100.00% 0.00% 2025 100.00% 0.00% 2019 98.55% 1.45% "
+    "H1B Salaries Fiscal Year* Maximum Median Average Minimum "
+    "2026 $318,781 $173,732 $175,681 $103,646 "
+    "2025 $325,000 $166,962 $167,569 $106,558 "
+    "Latest H1B Job Titles sponsored by Databricks INC in 2026 (H1B LCAs) "
+    "H1B Job Title LCA Count Maximum Salary Average Salary Minimum Salary "
+    "Software Engineer 33 $187,741 $160,905 $131,997 "
+    "Sr Software Engineer 27 $226,138 $192,758 $157,000"
+)
+DATABRICKS_PROFILE_HTML = """
+<html>
+  <body>
+    <h1>Databricks INC H1B Sponsorship Data</h1>
+    <p>Yes, Databricks INC sponsors H1B visas.</p>
+    <table>
+      <tr><th colspan="5">H1B LCA Approvals, Denials</th></tr>
+      <tr>
+        <th>Fiscal Year*</th><th>Certified</th><th>Certified Withd.</th>
+        <th>Withdrawn</th><th>Denied</th>
+      </tr>
+      <tr><td>2026</td><td>173</td><td>-</td><td>1</td><td>-</td></tr>
+      <tr><td>2025</td><td>376</td><td>9</td><td>-</td><td>-</td></tr>
+      <tr><td>2024</td><td>292</td><td>33</td><td>1</td><td>-</td></tr>
+    </table>
+    <table>
+      <tr><th colspan="3">H1B LCA Approval &amp; Denial Rates</th></tr>
+      <tr><th>Fiscal Year*</th><th>Approval (%)</th><th>Denial (%)</th></tr>
+      <tr><td>2026</td><td>100.00%</td><td>0.00%</td></tr>
+      <tr><td>2025</td><td>100.00%</td><td>0.00%</td></tr>
+      <tr><td>2019</td><td>98.55%</td><td>1.45%</td></tr>
+    </table>
+    <table>
+      <tr><th colspan="5">USCIS H1B Approvals, Denials</th></tr>
+      <tr>
+        <th>Fiscal Year*</th><th>New Approvals</th><th>Cont. Approvals</th>
+        <th>New Denials</th><th>Cont. Denials</th>
+      </tr>
+      <tr><td>2026</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
+      <tr><td>2025</td><td>70</td><td>267</td><td>-</td><td>-</td></tr>
+      <tr><td>2024</td><td>81</td><td>202</td><td>-</td><td>-</td></tr>
+    </table>
+    <table>
+      <tr><th colspan="3">USCIS H1B Approval &amp; Denial Rates</th></tr>
+      <tr><th>Fiscal Year*</th><th>Approval (%)</th><th>Denial (%)</th></tr>
+      <tr><td>2026</td><td>N/A</td><td>N/A</td></tr>
+      <tr><td>2025</td><td>100.00%</td><td>0.00%</td></tr>
+      <tr><td>2023</td><td>98.04%</td><td>1.96%</td></tr>
+    </table>
+    <table>
+      <tr><th colspan="5">H1B Salaries</th></tr>
+      <tr>
+        <th>Fiscal Year*</th><th>Maximum</th><th>Median</th>
+        <th>Average</th><th>Minimum</th>
+      </tr>
+      <tr><td>2026</td><td>$318,781</td><td>$173,732</td><td>$175,681</td><td>$103,646</td></tr>
+      <tr><td>2025</td><td>$325,000</td><td>$166,962</td><td>$167,569</td><td>$106,558</td></tr>
+      <tr><td>2024</td><td>$285,500</td><td>$155,000</td><td>$165,360</td><td>$110,000</td></tr>
+    </table>
+  </body>
+</html>
+"""
+
+
+class FakeProfileFetcher:
+    def __init__(self, profile: CompanyProfile) -> None:
+        self.profile = profile
+        self.calls: list[str] = []
+        self.logger: object | None = None
+
+    async def fetch_company_profile(
+        self,
+        company_name: str,
+        *,
+        logger: object | None = None,
+    ) -> CompanyProfile:
+        self.calls.append(company_name)
+        self.logger = logger
+        return self.profile
+
+
+class FakeLogSink:
+    def __init__(self) -> None:
+        self.messages: list[tuple[str, str]] = []
+
+    async def debug(self, message: str) -> None:
+        self.messages.append(("debug", message))
+
+    async def info(self, message: str) -> None:
+        self.messages.append(("info", message))
+
+    async def warning(self, message: str) -> None:
+        self.messages.append(("warning", message))
+
+    async def error(self, message: str) -> None:
+        self.messages.append(("error", message))
+
+
+def cache_settings(tmp_path: Path, *, cache_ttl_seconds: int = 60 * 60) -> Settings:
+    return Settings(
+        profile_dir=tmp_path / "browser-profile",
+        cache_dir=tmp_path / "company-cache",
+        cache_ttl_seconds=cache_ttl_seconds,
+    )
+
+
+def databricks_company_profile(*, fetched_at: datetime | None = None) -> CompanyProfile:
+    return CompanyProfile(
+        cache_schema_version=COMPANY_PROFILE_CACHE_SCHEMA_VERSION,
+        company_query="Databricks",
+        matched_company="DATABRICKS INC",
+        url=DATABRICKS_PROFILE_URL,
+        fetched_at=fetched_at or datetime.now(UTC),
+        sponsor_status="sponsors",
+        profile=parse_h1bgrader_profile(DATABRICKS_PROFILE_HTML),
+    )
