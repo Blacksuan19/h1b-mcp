@@ -129,15 +129,60 @@ Example response shape:
 
 ## How It Works
 
-1. Checks the local company-profile cache for a fresh match.
-2. Opens `https://h1bgrader.com/` in SeleniumBase UC mode when a fresh fetch is needed.
-3. Searches the company name in the H1BGrader company search box.
-4. Selects the best dropdown result and navigates to the company profile.
-5. Parses the company profile HTML with Beautiful Soup.
-6. Opens the H1B salaries, grade, and job titles tabs.
-7. Extracts LCA, USCIS, salary, grade, grade insight, and job-title data into typed models.
-8. Stores the parsed company profile locally for later tool calls.
-9. Builds focused tool responses from the cached profile.
+<details>
+<summary>View request flow diagram</summary>
+
+```mermaid
+flowchart TD
+    A[MCP client calls company tool] --> B[FastMCP tool handler]
+    B --> C[run_company_profile_tool]
+    C --> D[H1BGraderService.get_company_profile]
+
+    D --> E{Fresh cache entry?}
+    E -->|Yes| F[Load CompanyProfile from local cache]
+    E -->|No| G[H1BGraderClient.fetch_company_profile]
+
+    G --> H[Launch SeleniumBase UC browser]
+    H --> I[Open H1BGrader homepage]
+    I --> J[Search company name]
+    J --> K[Click dropdown result]
+    K --> L[Open salaries, grade, and job-title tabs]
+    L --> M[Read body text and page source]
+    M --> N[Parse tables and grade data into CompanyProfile]
+    N --> O[Write CompanyProfile to cache]
+
+    F --> P[Response builder]
+    O --> P
+    P --> Q{Requested tool}
+    Q --> R[Company sponsorship signal]
+    Q --> S[Job-title sponsorship signal]
+    Q --> T[Full profile]
+    Q --> U[Job titles]
+    Q --> V[Salaries]
+    Q --> W[Grade insights]
+
+    R --> X[Return JSON to MCP client]
+    S --> X
+    T --> X
+    U --> X
+    V --> X
+    W --> X
+
+    G --> Y{Cloudflare or lookup failure?}
+    Y -->|Blocked or failed| Z[Return Blocked JSON with evidence]
+```
+
+</details>
+
+1. A FastMCP tool receives a company-level request.
+2. The shared company tool runner creates an `H1BGraderService` and logs progress through the MCP context.
+3. The service checks the local company-profile cache for a fresh parsed profile.
+4. On cache hit, the cached `CompanyProfile` goes straight to the response builder.
+5. On cache miss, the SeleniumBase UC client opens H1BGrader, searches the company, and navigates to the matched profile.
+6. The client opens the salaries, grade, and job-title tabs before reading the page body and HTML.
+7. Parsers extract LCA, USCIS, salary, grade, grade insight, and job-title data into typed profile models.
+8. The service stores the parsed profile locally for later tool calls.
+9. The requested tool builds its focused JSON response from the same cached profile data.
 
 ## Signals
 
