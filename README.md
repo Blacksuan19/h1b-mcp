@@ -7,16 +7,16 @@
 
 Live H-1B sponsorship checks for Codex and other MCP-compatible agents.
 
-`h1b-mcp` opens H1BGrader in a real browser, searches for a company, extracts
-the company profile tables, and returns a normalized sponsorship signal with
-structured evidence.
+`h1b-mcp` opens H1BGrader in a real browser, searches for companies, job
+titles, and locations, extracts profile tables, and returns normalized
+sponsorship signals with structured evidence.
 
 > This is an independent community project. It is not affiliated with,
 > authorized by, endorsed by, or sponsored by H1BGrader.
 
 ## Features
 
-- Live H1BGrader company lookup through SeleniumBase UC mode.
+- Live H1BGrader company, job-title, and location lookup through SeleniumBase UC mode.
 - Structured H-1B sponsor signal: `Strong signal`, `Mixed signal`,
   `Weak signal`, `No sponsor`, or `Blocked`.
 - Parsed annual LCA approvals and denial counts.
@@ -26,7 +26,8 @@ structured evidence.
 - Parsed annual H-1B salary maximum, median, average, and minimum.
 - Parsed H1BGrader grade, confidence, annual grades, and grade insight cards.
 - Parsed latest H-1B job title counts and salary ranges.
-- Parsed job-title and location aggregate profiles for future cross-company tools.
+- Parsed job-title and location aggregate profiles with top employers, LCA
+  trends, approval rates, and salary history.
 - Local caches so repeated checks can reuse parsed H1BGrader data.
 - Typed Pydantic response models that are easy for agents to consume.
 - Browser-block aware behavior that returns `Blocked` instead of inventing a
@@ -42,6 +43,12 @@ structured evidence.
 | `get_company_job_titles` | Return sponsored job titles for a company. | Job title, LCA count, max salary, average salary, and minimum salary. |
 | `get_company_salaries` | Return annual H-1B salary history for a company. | Fiscal year, max salary, median salary, average salary, and minimum salary. |
 | `get_company_grade` | Return H1BGrader grade details for a company. | Latest grade, confidence, annual grades, and grade insight cards. |
+| `check_h1b_job_title_sponsorship` | Classify market-level H-1B sponsorship evidence for a job title. | Signal, evidence, latest LCA row, approval rate, salary row, and top employers. |
+| `get_h1b_job_title_employers` | Return top H-1B sponsoring employers for a job title. | Employer names and LCA filing counts. |
+| `get_h1b_job_title_salary` | Return annual H-1B salary history for a job title. | Fiscal year, max salary, median salary, average salary, and minimum salary. |
+| `check_h1b_location_sponsorship` | Classify city-level H-1B sponsorship evidence. | Signal, evidence, latest LCA row, approval rate, salary row, and top employers. |
+| `get_h1b_location_employers` | Return top H-1B sponsoring employers for a city. | Employer names and LCA filing counts. |
+| `get_h1b_location_salary` | Return annual H-1B salary history for a city. | Fiscal year, max salary, median salary, average salary, and minimum salary. |
 
 ## Quick Start
 
@@ -172,7 +179,7 @@ flowchart TD
     G --> Y{Cloudflare or lookup failure?}
     Y -->|Blocked or failed| Z[Return Blocked JSON with evidence]
 
-    A2[Future job-title/location profile lookup] --> B2[Open job-title or city search tab]
+    A2[Job-title/location tool call] --> B2[Open job-title or city search tab]
     B2 --> C2[Type query into shared typeahead]
     C2 --> D2[Click typeahead suggestion]
     D2 --> E2[Parse shared result tables]
@@ -219,15 +226,14 @@ The browser profile and caches are stored at:
 
 ## Current Scope
 
-This project currently exposes single-company tools and caches parsed company
-profiles locally. Job-title and location profiles can also be fetched, parsed,
-and cached internally as groundwork for future tools. It does not ship a bundled
-employer database or bulk scrape H1BGrader.
+This project exposes company, job-title, and location tools backed by locally
+cached parsed H1BGrader profiles. It does not ship a bundled employer database
+or bulk scrape H1BGrader.
 
 ## Roadmap
 
-- Tools for cached job-title and location profiles.
 - Company comparison across sponsorship strength, grades, salaries, and titles.
+- Broader search tools across H1BGrader-supported job-title and city pages.
 
 ## Troubleshooting
 
