@@ -22,7 +22,7 @@ def build_company_sponsorship_result(
     evidence = company_sponsorship_evidence(company_profile)
     return CompanySponsorshipResult(
         company_query=company_query,
-        matched_company=company_profile.matched_company,
+        matched_company=company_profile.matched_name,
         signal=classify_company_sponsorship(company_profile),
         url=company_profile.url,
         evidence=evidence or ["No clear H-1B sponsorship evidence was parsed."],
@@ -46,7 +46,7 @@ def build_company_job_sponsorship_result(
     )
     return CompanyJobSponsorshipResult(
         company_query=company_query,
-        matched_company=company_profile.matched_company,
+        matched_company=company_profile.matched_name,
         job_title_query=job_title,
         signal=signal,
         url=company_profile.url,
@@ -63,7 +63,7 @@ def build_company_job_titles_result(
 ) -> CompanyJobTitlesResult:
     return CompanyJobTitlesResult(
         company_query=company_query,
-        matched_company=company_profile.matched_company,
+        matched_company=company_profile.matched_name,
         url=company_profile.url,
         job_titles=company_profile.profile.job_titles,
     )
@@ -76,7 +76,7 @@ def build_company_salaries_result(
 ) -> CompanySalariesResult:
     return CompanySalariesResult(
         company_query=company_query,
-        matched_company=company_profile.matched_company,
+        matched_company=company_profile.matched_name,
         url=company_profile.url,
         salaries=company_profile.profile.h1b_salaries,
     )
@@ -89,7 +89,7 @@ def build_company_grade_result(
 ) -> CompanyGradeResult:
     return CompanyGradeResult(
         company_query=company_query,
-        matched_company=company_profile.matched_company,
+        matched_company=company_profile.matched_name,
         url=company_profile.url,
         grade=company_profile.profile.grade,
     )

@@ -26,7 +26,8 @@ structured evidence.
 - Parsed annual H-1B salary maximum, median, average, and minimum.
 - Parsed H1BGrader grade, confidence, annual grades, and grade insight cards.
 - Parsed latest H-1B job title counts and salary ranges.
-- Local company-profile cache so repeated checks can reuse parsed H1BGrader data.
+- Parsed job-title and location aggregate profiles for future cross-company tools.
+- Local caches so repeated checks can reuse parsed H1BGrader data.
 - Typed Pydantic response models that are easy for agents to consume.
 - Browser-block aware behavior that returns `Blocked` instead of inventing a
   sponsor conclusion.
@@ -170,6 +171,12 @@ flowchart TD
 
     G --> Y{Cloudflare or lookup failure?}
     Y -->|Blocked or failed| Z[Return Blocked JSON with evidence]
+
+    A2[Future job-title/location profile lookup] --> B2[Open job-title or city search tab]
+    B2 --> C2[Type query into shared typeahead]
+    C2 --> D2[Click typeahead suggestion]
+    D2 --> E2[Parse shared result tables]
+    E2 --> X
 ```
 
 </details>
@@ -183,6 +190,7 @@ flowchart TD
 7. Parsers extract LCA, USCIS, salary, grade, grade insight, and job-title data into typed profile models.
 8. The service stores the parsed profile locally for later tool calls.
 9. The requested tool builds its focused JSON response from the same cached profile data.
+10. Job-title and location profile fetches use the same search tab/typeahead flow, then parse and cache the shared result-page tables.
 
 ## Signals
 
@@ -200,23 +208,25 @@ H1BGrader may still present human verification, rate limits, or other bot
 protection. When that happens, `h1b-mcp` returns a `Blocked` result with a
 clear evidence message instead of making a claim from memory.
 
-The browser profile and company cache are stored at:
+The browser profile and caches are stored at:
 
 ```text
 ~/.h1b-mcp/browser-profile
 ~/.h1b-mcp/cache/company-profiles
+~/.h1b-mcp/cache/job-title-profiles
+~/.h1b-mcp/cache/location-profiles
 ```
 
 ## Current Scope
 
-This project currently performs single-company lookups and caches the parsed
-company profiles locally. It does not ship a bundled employer database or bulk
-scrape H1BGrader.
+This project currently exposes single-company tools and caches parsed company
+profiles locally. Job-title and location profiles can also be fetched, parsed,
+and cached internally as groundwork for future tools. It does not ship a bundled
+employer database or bulk scrape H1BGrader.
 
 ## Roadmap
 
-- Search by job title across companies, where the live site supports it.
-- Location-based search, where the live site supports it.
+- Tools for cached job-title and location profiles.
 - Company comparison across sponsorship strength, grades, salaries, and titles.
 
 ## Troubleshooting

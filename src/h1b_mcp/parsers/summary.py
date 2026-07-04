@@ -2,8 +2,8 @@ import re
 from datetime import UTC, datetime
 
 from h1b_mcp.constants import (
-    COMPANY_PROFILE_CACHE_SCHEMA_VERSION,
     NO_SPONSOR_RE,
+    PROFILE_CACHE_SCHEMA_VERSION,
     YES_SPONSOR_RE,
 )
 from h1b_mcp.models import (
@@ -53,9 +53,9 @@ def extract_h1bgrader_company_profile(
     profile = parse_h1bgrader_profile(html or compact)
 
     return CompanyProfile(
-        cache_schema_version=COMPANY_PROFILE_CACHE_SCHEMA_VERSION,
-        company_query=company_query,
-        matched_company=matched_company,
+        cache_schema_version=PROFILE_CACHE_SCHEMA_VERSION,
+        query=company_query,
+        matched_name=matched_company,
         url=url,
         fetched_at=fetched_at or datetime.now(UTC),
         profile=profile,
@@ -113,7 +113,7 @@ def build_h1b_lookup_result(
 
     return H1BLookupResult(
         company_query=company_query,
-        matched_company=company_profile.matched_company,
+        matched_company=company_profile.matched_name,
         signal=signal,
         url=company_profile.url,
         evidence=evidence,

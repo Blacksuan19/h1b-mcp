@@ -1,27 +1,39 @@
 import json
+from collections.abc import Callable
 from datetime import UTC, datetime, timedelta
 from hashlib import sha256
+from pathlib import Path
+from typing import Any, Generic, TypeVar
 from urllib.parse import urlparse
 
 from pydantic import ValidationError
 
-from h1b_mcp.constants import COMPANY_PROFILE_CACHE_SCHEMA_VERSION
-from h1b_mcp.models import CompanyProfile
-from h1b_mcp.settings import Settings
+from h1b_mcp.constants import PROFILE_CACHE_SCHEMA_VERSION
+from h1b_mcp.models import CachedProfile
 from h1b_mcp.utils import normalize_company_name
 
 INDEX_FILENAME = "index.json"
+TProfile = TypeVar("TProfile", bound=CachedProfile[Any])
 
 
-class CompanyProfileCache:
-    """Disk cache keyed by normalized company aliases and guarded by schema version and TTL."""
+class ProfileCache(Generic[TProfile]):
+    """Disk cache for any H1BGrader profile keyed by normalized aliases."""
 
-    def __init__(self, settings: Settings) -> None:
-        self._cache_dir = settings.cache_dir
-        self._ttl = timedelta(seconds=settings.cache_ttl_seconds)
+    def __init__(
+        self,
+        *,
+        cache_dir: Path,
+        ttl_seconds: int,
+        model_type: type[TProfile],
+        aliases: Callable[[TProfile], set[str]],
+    ) -> None:
+        self._cache_dir = cache_dir
+        self._ttl = timedelta(seconds=ttl_seconds)
+        self._model_type = model_type
+        self._aliases = aliases
 
-    def get(self, company_name: str) -> CompanyProfile | None:
-        key = cache_key(company_name)
+    def get(self, query: str) -> TProfile | None:
+        key = cache_key(query)
         if not key:
             return None
 
@@ -32,9 +44,9 @@ class CompanyProfileCache:
             return None
         return profile
 
-    def set(self, profile: CompanyProfile) -> None:
+    def set(self, profile: TProfile) -> None:
         self._cache_dir.mkdir(parents=True, exist_ok=True)
-        aliases = profile_aliases(profile)
+        aliases = self._aliases(profile)
         canonical_key = first_alias(aliases)
         if not canonical_key:
             return
@@ -48,24 +60,24 @@ class CompanyProfileCache:
             index[alias] = filename
         self._write_index(index)
 
-    def _read_profile(self, filename: str) -> CompanyProfile | None:
+    def _read_profile(self, filename: str) -> TProfile | None:
         path = self._cache_dir / filename
         if not path.exists():
             return None
         try:
-            return CompanyProfile.model_validate_json(path.read_text(encoding="utf-8"))
+            return self._model_type.model_validate_json(path.read_text(encoding="utf-8"))
         except (OSError, ValidationError, ValueError):
             return None
 
-    def _is_stale(self, profile: CompanyProfile) -> bool:
+    def _is_stale(self, profile: TProfile) -> bool:
         fetched_at = profile.fetched_at
         if fetched_at.tzinfo is None:
             fetched_at = fetched_at.replace(tzinfo=UTC)
         return datetime.now(UTC) - fetched_at > self._ttl
 
     @staticmethod
-    def _has_stale_schema(profile: CompanyProfile) -> bool:
-        return profile.cache_schema_version < COMPANY_PROFILE_CACHE_SCHEMA_VERSION
+    def _has_stale_schema(profile: TProfile) -> bool:
+        return profile.cache_schema_version < PROFILE_CACHE_SCHEMA_VERSION
 
     def _load_index(self) -> dict[str, str]:
         path = self._cache_dir / INDEX_FILENAME
@@ -85,11 +97,11 @@ class CompanyProfileCache:
         path.write_text(json.dumps(index, indent=2, sort_keys=True), encoding="utf-8")
 
 
-def profile_aliases(profile: CompanyProfile) -> set[str]:
-    """Return every stable lookup key that should point at the same cached profile."""
+def profile_aliases(profile: CachedProfile[Any]) -> set[str]:
+    """Return stable lookup keys that should point at the same cached profile."""
     aliases = {
-        cache_key(profile.company_query),
-        cache_key(profile.matched_company or ""),
+        cache_key(profile.query),
+        cache_key(profile.matched_name or ""),
         cache_key(url_slug(profile.url)),
     }
     return {alias for alias in aliases if alias}
@@ -101,12 +113,12 @@ def first_alias(aliases: set[str]) -> str:
 
 
 def cache_key(value: str) -> str:
-    """Use the same normalization for cache lookup as company-name matching."""
+    """Use the same normalization for cache lookup as H1BGrader typeahead lookup."""
     return normalize_company_name(value)
 
 
 def profile_filename(key: str) -> str:
-    """Keep cache filenames short and filesystem-safe without exposing raw company names."""
+    """Keep cache filenames short and filesystem-safe without exposing raw queries."""
     digest = sha256(key.encode("utf-8")).hexdigest()[:20]
     return f"{digest}.json"
 

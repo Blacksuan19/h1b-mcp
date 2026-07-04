@@ -1,6 +1,9 @@
 from datetime import datetime
+from typing import Generic, TypeVar
 
 from pydantic import BaseModel, Field
+
+TParsedProfile = TypeVar("TParsedProfile", bound=BaseModel)
 
 
 class AnnualCountRow(BaseModel):
@@ -28,6 +31,11 @@ class JobTitleRow(BaseModel):
     maximum_salary: int | None = None
     average_salary: int | None = None
     minimum_salary: int | None = None
+
+
+class EmployerFilingRow(BaseModel):
+    employer_name: str
+    lca_count: int
 
 
 class AnnualGradeRow(BaseModel):
@@ -62,10 +70,28 @@ class H1BGraderProfile(BaseModel):
     grade: GradeProfile | None = None
 
 
-class CompanyProfile(BaseModel):
+class CachedProfile(BaseModel, Generic[TParsedProfile]):
     cache_schema_version: int = 0
-    company_query: str
-    matched_company: str | None = None
+    query: str
+    matched_name: str | None = None
     url: str
     fetched_at: datetime
+
+
+class CompanyProfile(CachedProfile[H1BGraderProfile]):
     profile: H1BGraderProfile = Field(default_factory=H1BGraderProfile)
+
+
+class H1BGraderAggregateProfile(BaseModel):
+    lca_approvals: list[AnnualCountRow] = Field(default_factory=list)
+    lca_approval_rates: list[AnnualRateRow] = Field(default_factory=list)
+    h1b_salaries: list[AnnualSalaryRow] = Field(default_factory=list)
+    employers: list[EmployerFilingRow] = Field(default_factory=list)
+
+
+class JobTitleProfile(CachedProfile[H1BGraderAggregateProfile]):
+    profile: H1BGraderAggregateProfile = Field(default_factory=H1BGraderAggregateProfile)
+
+
+class LocationProfile(CachedProfile[H1BGraderAggregateProfile]):
+    profile: H1BGraderAggregateProfile = Field(default_factory=H1BGraderAggregateProfile)

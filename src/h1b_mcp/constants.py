@@ -1,6 +1,22 @@
 import re
 
-COMPANY_PROFILE_CACHE_SCHEMA_VERSION = 5
+PROFILE_CACHE_SCHEMA_VERSION = 5
+COMPANY_SEARCH_TAB_SELECTOR = "#pills-employer-tab"
+JOB_TITLE_SEARCH_TAB_SELECTOR = "#pills-job-tab"
+LOCATION_SEARCH_TAB_SELECTOR = "#pills-city-tab"
+COMPANY_SEARCH_INPUT_SELECTOR = "#employer"
+JOB_TITLE_SEARCH_INPUT_SELECTOR = "#job"
+LOCATION_SEARCH_INPUT_SELECTOR = "#city"
+SEARCH_TAB_SELECTORS = {
+    "company": COMPANY_SEARCH_TAB_SELECTOR,
+    "job_title": JOB_TITLE_SEARCH_TAB_SELECTOR,
+    "location": LOCATION_SEARCH_TAB_SELECTOR,
+}
+SEARCH_INPUT_SELECTORS = {
+    "company": COMPANY_SEARCH_INPUT_SELECTOR,
+    "job_title": JOB_TITLE_SEARCH_INPUT_SELECTOR,
+    "location": LOCATION_SEARCH_INPUT_SELECTOR,
+}
 COMPANY_INPUT_SELECTOR = (
     "input[placeholder*='Company' i], "
     "input[placeholder*='Search' i], "
@@ -11,6 +27,8 @@ COMPANY_INPUT_SELECTOR = (
     "input[name*='company' i]"
 )
 COMPANY_PROFILE_PATH_RE = re.compile(r"/h1b-sponsors/", re.I)
+JOB_TITLE_PROFILE_PATH_RE = re.compile(r"/job-titles/", re.I)
+LOCATION_PROFILE_PATH_RE = re.compile(r"/cities/", re.I)
 COMPANY_SUGGESTION_SELECTOR = ".tt-menu.tt-open .tt-suggestion.tt-selectable"
 COMPANY_SALARIES_TAB_SELECTOR = "#employer-salaries-tab"
 COMPANY_GRADE_TAB_SELECTOR = "#employer-grade-tab"

@@ -1,8 +1,9 @@
 from datetime import UTC, datetime
 from pathlib import Path
 
-from h1b_mcp.constants import COMPANY_PROFILE_CACHE_SCHEMA_VERSION
-from h1b_mcp.models import CompanyProfile
+from h1b_mcp.constants import PROFILE_CACHE_SCHEMA_VERSION
+from h1b_mcp.models import CompanyProfile, JobTitleProfile, LocationProfile
+from h1b_mcp.parsers.aggregate import parse_h1bgrader_aggregate_profile
 from h1b_mcp.parsers.tables import parse_h1bgrader_profile
 from h1b_mcp.settings import Settings
 
@@ -152,11 +153,59 @@ DATABRICKS_PROFILE_HTML = """
 </html>
 """
 
+SEARCH_RESULT_URL = "https://h1bgrader.com/job-titles/machine-learning-engineer-370oqexvkz"
+SEARCH_RESULT_HTML = """
+<html>
+  <body>
+    <h1>Machine Learning Engineer H1B Sponsorship Data</h1>
+    <table>
+      <tr><th colspan="5">H1B LCA Approvals, Denials</th></tr>
+      <tr>
+        <th>Fiscal Year*</th><th>Certified</th><th>Certified Withd.</th>
+        <th>Withdrawn</th><th>Denied</th>
+      </tr>
+      <tr><td>2026</td><td>290</td><td>20</td><td>5</td><td>1</td></tr>
+      <tr><td>2025</td><td>512</td><td>33</td><td>9</td><td>4</td></tr>
+    </table>
+    <table>
+      <tr><th colspan="3">H1B LCA Approval &amp; Denial Rates</th></tr>
+      <tr><th>Fiscal Year*</th><th>Approval (%)</th><th>Denial (%)</th></tr>
+      <tr><td>2026</td><td>99.68%</td><td>0.32%</td></tr>
+      <tr><td>2025</td><td>99.27%</td><td>0.73%</td></tr>
+    </table>
+    <table>
+      <tr><th colspan="5">H1B Salaries</th></tr>
+      <tr>
+        <th>Fiscal Year*</th><th>Maximum</th><th>Median</th>
+        <th>Average</th><th>Minimum</th>
+      </tr>
+      <tr><td>2026</td><td>$320,000</td><td>$180,000</td><td>$190,500</td><td>$110,000</td></tr>
+      <tr><td>2025</td><td>$300,000</td><td>$170,000</td><td>$181,250</td><td>$105,000</td></tr>
+    </table>
+    <table>
+      <tr><th>Employer Name</th><th>H1B LCA Filings Count</th></tr>
+      <tr><td>Adobe INC</td><td>126</td></tr>
+      <tr><td>Databricks INC</td><td>45</td></tr>
+    </table>
+  </body>
+</html>
+"""
+
 
 class FakeProfileFetcher:
-    def __init__(self, profile: CompanyProfile) -> None:
+    def __init__(
+        self,
+        profile: CompanyProfile,
+        *,
+        job_title_profile: JobTitleProfile | None = None,
+        location_profile: LocationProfile | None = None,
+    ) -> None:
         self.profile = profile
+        self.job_title_profile = job_title_profile
+        self.location_profile = location_profile
         self.calls: list[str] = []
+        self.job_title_calls: list[str] = []
+        self.location_calls: list[str] = []
         self.logger: object | None = None
 
     async def fetch_company_profile(
@@ -168,6 +217,30 @@ class FakeProfileFetcher:
         self.calls.append(company_name)
         self.logger = logger
         return self.profile
+
+    async def fetch_job_title_profile(
+        self,
+        job_title: str,
+        *,
+        logger: object | None = None,
+    ) -> JobTitleProfile:
+        self.job_title_calls.append(job_title)
+        self.logger = logger
+        if self.job_title_profile is None:
+            raise NotImplementedError
+        return self.job_title_profile
+
+    async def fetch_location_profile(
+        self,
+        location: str,
+        *,
+        logger: object | None = None,
+    ) -> LocationProfile:
+        self.location_calls.append(location)
+        self.logger = logger
+        if self.location_profile is None:
+            raise NotImplementedError
+        return self.location_profile
 
 
 class FakeLogSink:
@@ -191,16 +264,43 @@ def cache_settings(tmp_path: Path, *, cache_ttl_seconds: int = 60 * 60) -> Setti
     return Settings(
         profile_dir=tmp_path / "browser-profile",
         cache_dir=tmp_path / "company-cache",
+        job_title_cache_dir=tmp_path / "job-title-cache",
+        location_cache_dir=tmp_path / "location-cache",
         cache_ttl_seconds=cache_ttl_seconds,
     )
 
 
 def databricks_company_profile(*, fetched_at: datetime | None = None) -> CompanyProfile:
     return CompanyProfile(
-        cache_schema_version=COMPANY_PROFILE_CACHE_SCHEMA_VERSION,
-        company_query="Databricks",
-        matched_company="DATABRICKS INC",
+        cache_schema_version=PROFILE_CACHE_SCHEMA_VERSION,
+        query="Databricks",
+        matched_name="DATABRICKS INC",
         url=DATABRICKS_PROFILE_URL,
         fetched_at=fetched_at or datetime.now(UTC),
         profile=parse_h1bgrader_profile(DATABRICKS_PROFILE_HTML),
+    )
+
+
+def machine_learning_engineer_profile(
+    *,
+    fetched_at: datetime | None = None,
+) -> JobTitleProfile:
+    return JobTitleProfile(
+        cache_schema_version=PROFILE_CACHE_SCHEMA_VERSION,
+        query="Machine Learning Engineer",
+        matched_name="MACHINE LEARNING ENGINEER",
+        url=SEARCH_RESULT_URL,
+        fetched_at=fetched_at or datetime.now(UTC),
+        profile=parse_h1bgrader_aggregate_profile(SEARCH_RESULT_HTML),
+    )
+
+
+def chicago_location_profile(*, fetched_at: datetime | None = None) -> LocationProfile:
+    return LocationProfile(
+        cache_schema_version=PROFILE_CACHE_SCHEMA_VERSION,
+        query="Chicago",
+        matched_name="CHICAGO, IL",
+        url="https://h1bgrader.com/cities/chicago-illinois-1ok85pwzkd",
+        fetched_at=fetched_at or datetime.now(UTC),
+        profile=parse_h1bgrader_aggregate_profile(SEARCH_RESULT_HTML),
     )
