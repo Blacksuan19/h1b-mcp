@@ -35,7 +35,12 @@ structured evidence.
 
 | Tool | Description | Output |
 | --- | --- | --- |
-| `check_h1b_sponsorship` | Search H1BGrader for a company and classify its sponsorship signal. | Company match, profile URL, evidence, and parsed LCA/USCIS/salary/grade/job-title profile data. |
+| `check_h1b_sponsorship` | Classify company-level H-1B sponsorship evidence. | Compact signal, profile URL, and evidence. |
+| `check_company_job_sponsorship` | Check whether a company has sponsored evidence for a specific job title. | Exact/close/adjacent/company-only signal, matched titles, LCA counts, and salary ranges. |
+| `get_company_profile` | Return the full parsed company profile. | Cached profile metadata plus all parsed LCA, USCIS, salary, grade, and job-title data. |
+| `get_company_job_titles` | Return sponsored job titles for a company. | Job title, LCA count, max salary, average salary, and minimum salary. |
+| `get_company_salaries` | Return annual H-1B salary history for a company. | Fiscal year, max salary, median salary, average salary, and minimum salary. |
+| `get_company_grade` | Return H1BGrader grade details for a company. | Latest grade, confidence, annual grades, and grade insight cards. |
 
 ## Quick Start
 
@@ -114,85 +119,11 @@ Example response shape:
   "signal": "Strong signal",
   "url": "https://h1bgrader.com/h1b-sponsors/databricks-inc-nokpn1vn04",
   "evidence": [
-    "H1BGrader LCA approvals table reports 173 certified LCA filings and 0 denials in fiscal year 2026."
-  ],
-  "profile": {
-    "lca_approvals": [
-      {
-        "fiscal_year": 2026,
-        "counts": {
-          "certified": 173,
-          "certified_withdrawn": 0,
-          "withdrawn": 1,
-          "denied": 0
-        }
-      }
-    ],
-    "lca_approval_rates": [
-      {
-        "fiscal_year": 2026,
-        "approval_rate": 100.0,
-        "denial_rate": 0.0
-      }
-    ],
-    "uscis_approvals": [
-      {
-        "fiscal_year": 2025,
-        "counts": {
-          "new_approvals": 70,
-          "continuing_approvals": 267,
-          "new_denials": 0,
-          "continuing_denials": 0
-        }
-      }
-    ],
-    "uscis_approval_rates": [
-      {
-        "fiscal_year": 2025,
-        "approval_rate": 100.0,
-        "denial_rate": 0.0
-      }
-    ],
-    "h1b_salaries": [
-      {
-        "fiscal_year": 2026,
-        "maximum_salary": 318781,
-        "median_salary": 173732,
-        "average_salary": 175681,
-        "minimum_salary": 103646
-      }
-    ],
-    "job_titles": [
-      {
-        "title": "Software Engineer",
-        "lca_count": 33,
-        "maximum_salary": 187741,
-        "average_salary": 160905,
-        "minimum_salary": 131997
-      }
-    ],
-    "grade": {
-      "latest_grade": "A",
-      "confidence": "High Confidence",
-      "annual_grades": [
-        {
-          "fiscal_year": 2024,
-          "grade": "A",
-          "period": "Oct 2023 - Sep 2024"
-        }
-      ],
-      "insights": [
-        {
-          "title": "Great H1B LCA Success Record for Databricks INC",
-          "description": "Databricks INC had an overall approval rate of 99 / 100.",
-          "score": 99,
-          "score_max": 100,
-          "status": null,
-          "sentiment": "positive"
-        }
-      ]
-    }
-  }
+    "Latest LCA table reports 174 filings in fiscal year 2026, including 173 certified and 0 denied.",
+    "Latest non-empty USCIS table row reports 337 approvals and 0 denials in fiscal year 2025.",
+    "H1BGrader grade tab shows latest grade A with high confidence.",
+    "Job title table includes 56 sponsored title rows."
+  ]
 }
 ```
 
@@ -206,7 +137,7 @@ Example response shape:
 6. Opens the H1B salaries, grade, and job titles tabs.
 7. Extracts LCA, USCIS, salary, grade, grade insight, and job-title data into typed models.
 8. Stores the parsed company profile locally for later tool calls.
-9. Builds a compact sponsorship signal with evidence.
+9. Builds focused tool responses from the cached profile.
 
 ## Signals
 
@@ -239,10 +170,9 @@ scrape H1BGrader.
 
 ## Roadmap
 
-- Company profile tool that returns the parsed LCA, USCIS, salary, grade, and job-title data directly.
 - Search by job title across companies, where the live site supports it.
-- More focused response builders for sponsorship checks, company summaries, and
-  salary/title exploration.
+- Location-based search, where the live site supports it.
+- Company comparison across sponsorship strength, grades, salaries, and titles.
 
 ## Troubleshooting
 
