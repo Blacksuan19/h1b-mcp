@@ -23,6 +23,7 @@ structured evidence.
 - Parsed annual LCA approval and denial rates.
 - Parsed annual USCIS H-1B approvals and denial counts.
 - Parsed annual USCIS approval and denial rates.
+- Parsed annual H-1B salary maximum, median, average, and minimum.
 - Local company-profile cache so repeated checks can reuse parsed H1BGrader data.
 - Typed Pydantic response models that are easy for agents to consume.
 - Browser-block aware behavior that returns `Blocked` instead of inventing a
@@ -32,7 +33,7 @@ structured evidence.
 
 | Tool | Description | Output |
 | --- | --- | --- |
-| `check_h1b_sponsorship` | Search H1BGrader for a company and classify its sponsorship signal. | Company match, profile URL, evidence, and parsed annual LCA/USCIS tables. |
+| `check_h1b_sponsorship` | Search H1BGrader for a company and classify its sponsorship signal. | Company match, profile URL, evidence, and parsed annual LCA/USCIS/salary tables. |
 
 ## Quick Start
 
@@ -149,6 +150,15 @@ Example response shape:
         "approval_rate": 100.0,
         "denial_rate": 0.0
       }
+    ],
+    "h1b_salaries": [
+      {
+        "fiscal_year": 2026,
+        "maximum_salary": 318781,
+        "median_salary": 173732,
+        "average_salary": 175681,
+        "minimum_salary": 103646
+      }
     ]
   }
 }
@@ -161,7 +171,7 @@ Example response shape:
 3. Searches the company name in the H1BGrader company search box.
 4. Selects the best dropdown result and navigates to the company profile.
 5. Parses the company profile HTML with Beautiful Soup.
-6. Extracts LCA and USCIS approval/denial tables into typed models.
+6. Opens the H1B salaries tab and extracts LCA, USCIS, and salary tables into typed models.
 7. Stores the parsed company profile locally for later tool calls.
 8. Builds a compact sponsorship signal with evidence.
 
@@ -196,8 +206,8 @@ scrape H1BGrader.
 
 ## Roadmap
 
-- Company profile tool that returns the parsed LCA and USCIS tables directly.
-- Job-title tab parsing for company roles and salaries.
+- Company profile tool that returns the parsed LCA, USCIS, and salary tables directly.
+- Job-title tab parsing for company roles.
 - Search by job title across companies, where the live site supports it.
 - More focused response builders for sponsorship checks, company summaries, and
   salary/title exploration.

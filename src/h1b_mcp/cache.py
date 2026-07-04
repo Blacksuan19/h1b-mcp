@@ -5,6 +5,7 @@ from urllib.parse import urlparse
 
 from pydantic import ValidationError
 
+from h1b_mcp.constants import COMPANY_PROFILE_CACHE_SCHEMA_VERSION
 from h1b_mcp.models import CompanyProfile
 from h1b_mcp.settings import Settings
 from h1b_mcp.utils import normalize_company_name
@@ -25,7 +26,7 @@ class CompanyProfileCache:
         index = self._load_index()
         filename = index.get(key, profile_filename(key))
         profile = self._read_profile(filename)
-        if not profile or self._is_stale(profile):
+        if not profile or self._is_stale(profile) or self._has_stale_schema(profile):
             return None
         return profile
 
@@ -59,6 +60,10 @@ class CompanyProfileCache:
         if fetched_at.tzinfo is None:
             fetched_at = fetched_at.replace(tzinfo=UTC)
         return datetime.now(UTC) - fetched_at > self._ttl
+
+    @staticmethod
+    def _has_stale_schema(profile: CompanyProfile) -> bool:
+        return profile.cache_schema_version < COMPANY_PROFILE_CACHE_SCHEMA_VERSION
 
     def _load_index(self) -> dict[str, str]:
         path = self._cache_dir / INDEX_FILENAME

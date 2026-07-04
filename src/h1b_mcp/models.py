@@ -18,14 +18,24 @@ class AnnualRateRow(BaseModel):
     denial_rate: float | None = None
 
 
+class AnnualSalaryRow(BaseModel):
+    fiscal_year: int
+    maximum_salary: int | None = None
+    median_salary: int | None = None
+    average_salary: int | None = None
+    minimum_salary: int | None = None
+
+
 class H1BGraderProfile(BaseModel):
     lca_approvals: list[AnnualCountRow] = Field(default_factory=list)
     lca_approval_rates: list[AnnualRateRow] = Field(default_factory=list)
     uscis_approvals: list[AnnualCountRow] = Field(default_factory=list)
     uscis_approval_rates: list[AnnualRateRow] = Field(default_factory=list)
+    h1b_salaries: list[AnnualSalaryRow] = Field(default_factory=list)
 
 
 class CompanyProfile(BaseModel):
+    cache_schema_version: int = 0
     company_query: str
     matched_company: str | None = None
     url: str

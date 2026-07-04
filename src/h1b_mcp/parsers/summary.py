@@ -2,6 +2,7 @@ import re
 from datetime import UTC, datetime
 
 from h1b_mcp.constants import (
+    COMPANY_PROFILE_CACHE_SCHEMA_VERSION,
     FISCAL_YEAR_RE,
     GRADE_RE,
     LCA_COUNT_RE,
@@ -59,6 +60,7 @@ def extract_h1bgrader_company_profile(
         sponsor_status = "sponsors"
 
     return CompanyProfile(
+        cache_schema_version=COMPANY_PROFILE_CACHE_SCHEMA_VERSION,
         company_query=company_query,
         matched_company=matched_company,
         url=url,
@@ -175,6 +177,7 @@ def has_profile_data(profile: H1BGraderProfile) -> bool:
         or profile.lca_approval_rates
         or profile.uscis_approvals
         or profile.uscis_approval_rates
+        or profile.h1b_salaries
     )
 
 

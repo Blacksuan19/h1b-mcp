@@ -3,7 +3,7 @@ from typing import Any
 
 from bs4 import BeautifulSoup
 
-from h1b_mcp.models import AnnualCountRow, AnnualRateRow, H1BGraderProfile
+from h1b_mcp.models import AnnualCountRow, AnnualRateRow, AnnualSalaryRow, H1BGraderProfile
 
 LCA_COUNT_COLUMNS = ("certified", "certified_withdrawn", "withdrawn", "denied")
 USCIS_COUNT_COLUMNS = (
@@ -23,6 +23,7 @@ def parse_h1bgrader_profile(page_source: str) -> H1BGraderProfile:
         lca_approval_rates=parse_lca_approval_rates(page_source),
         uscis_approvals=parse_uscis_approvals(page_source),
         uscis_approval_rates=parse_uscis_approval_rates(page_source),
+        h1b_salaries=parse_h1b_salaries(page_source),
     )
 
 
@@ -41,6 +42,7 @@ def parse_h1bgrader_profile_html(html: str) -> H1BGraderProfile:
         uscis_approval_rates=parse_rate_table(
             find_table(tables, "USCIS H1B Approval & Denial Rates")
         ),
+        h1b_salaries=parse_salary_table(find_table(tables, "H1B Salaries")),
     )
 
 
@@ -148,6 +150,23 @@ def parse_rate_table(table: list[list[str]]) -> list[AnnualRateRow]:
     return rows
 
 
+def parse_salary_table(table: list[list[str]]) -> list[AnnualSalaryRow]:
+    rows: list[AnnualSalaryRow] = []
+    for row in data_rows(table):
+        if len(row) < 5:
+            continue
+        rows.append(
+            AnnualSalaryRow(
+                fiscal_year=int(row[0]),
+                maximum_salary=parse_money_cell(row[1]),
+                median_salary=parse_money_cell(row[2]),
+                average_salary=parse_money_cell(row[3]),
+                minimum_salary=parse_money_cell(row[4]),
+            )
+        )
+    return rows
+
+
 def parse_lca_approvals(body_text: str) -> list[AnnualCountRow]:
     return parse_count_table_from_text(
         body_text,
@@ -194,6 +213,34 @@ def parse_uscis_approval_rates(body_text: str) -> list[AnnualRateRow]:
     )
 
 
+def parse_h1b_salaries(body_text: str) -> list[AnnualSalaryRow]:
+    section = table_section(
+        body_text,
+        start_marker="H1B Salaries Fiscal Year* Maximum Median Average Minimum",
+        end_markers=(
+            "*Fiscal Year for US Dept of Labor",
+            "View Latest H1B Salaries",
+            "H1B Job Title",
+        ),
+    )
+    rows: list[AnnualSalaryRow] = []
+    for match in re.finditer(
+        r"\b(20\d{2})\s+(\$[\d,]+|-|N/A)\s+(\$[\d,]+|-|N/A)\s+"
+        r"(\$[\d,]+|-|N/A)\s+(\$[\d,]+|-|N/A)",
+        section,
+    ):
+        rows.append(
+            AnnualSalaryRow(
+                fiscal_year=int(match.group(1)),
+                maximum_salary=parse_money_cell(match.group(2)),
+                median_salary=parse_money_cell(match.group(3)),
+                average_salary=parse_money_cell(match.group(4)),
+                minimum_salary=parse_money_cell(match.group(5)),
+            )
+        )
+    return rows
+
+
 def parse_rate_table_from_text(
     body_text: str,
     *,
@@ -237,3 +284,9 @@ def parse_percent_cell(value: str) -> float | None:
     if value == "N/A":
         return None
     return float(value.rstrip("%"))
+
+
+def parse_money_cell(value: str) -> int | None:
+    if value in {"-", "N/A"}:
+        return None
+    return int(value.replace("$", "").replace(",", ""))
