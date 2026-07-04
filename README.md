@@ -25,6 +25,7 @@ structured evidence.
 - Parsed annual USCIS approval and denial rates.
 - Parsed annual H-1B salary maximum, median, average, and minimum.
 - Parsed H1BGrader grade, confidence, annual grades, and grade insight cards.
+- Parsed latest H-1B job title counts and salary ranges.
 - Local company-profile cache so repeated checks can reuse parsed H1BGrader data.
 - Typed Pydantic response models that are easy for agents to consume.
 - Browser-block aware behavior that returns `Blocked` instead of inventing a
@@ -34,7 +35,7 @@ structured evidence.
 
 | Tool | Description | Output |
 | --- | --- | --- |
-| `check_h1b_sponsorship` | Search H1BGrader for a company and classify its sponsorship signal. | Company match, profile URL, evidence, and parsed LCA/USCIS/salary/grade profile data. |
+| `check_h1b_sponsorship` | Search H1BGrader for a company and classify its sponsorship signal. | Company match, profile URL, evidence, and parsed LCA/USCIS/salary/grade/job-title profile data. |
 
 ## Quick Start
 
@@ -161,6 +162,15 @@ Example response shape:
         "minimum_salary": 103646
       }
     ],
+    "job_titles": [
+      {
+        "title": "Software Engineer",
+        "lca_count": 33,
+        "maximum_salary": 187741,
+        "average_salary": 160905,
+        "minimum_salary": 131997
+      }
+    ],
     "grade": {
       "latest_grade": "A",
       "confidence": "High Confidence",
@@ -193,8 +203,8 @@ Example response shape:
 3. Searches the company name in the H1BGrader company search box.
 4. Selects the best dropdown result and navigates to the company profile.
 5. Parses the company profile HTML with Beautiful Soup.
-6. Opens the H1B salaries and grade tabs.
-7. Extracts LCA, USCIS, salary, grade, and grade insight data into typed models.
+6. Opens the H1B salaries, grade, and job titles tabs.
+7. Extracts LCA, USCIS, salary, grade, grade insight, and job-title data into typed models.
 8. Stores the parsed company profile locally for later tool calls.
 9. Builds a compact sponsorship signal with evidence.
 
@@ -229,8 +239,7 @@ scrape H1BGrader.
 
 ## Roadmap
 
-- Company profile tool that returns the parsed LCA, USCIS, and salary tables directly.
-- Job-title tab parsing for company roles.
+- Company profile tool that returns the parsed LCA, USCIS, salary, grade, and job-title data directly.
 - Search by job title across companies, where the live site supports it.
 - More focused response builders for sponsorship checks, company summaries, and
   salary/title exploration.

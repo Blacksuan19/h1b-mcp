@@ -26,6 +26,14 @@ class AnnualSalaryRow(BaseModel):
     minimum_salary: int | None = None
 
 
+class JobTitleRow(BaseModel):
+    title: str
+    lca_count: int
+    maximum_salary: int | None = None
+    average_salary: int | None = None
+    minimum_salary: int | None = None
+
+
 class AnnualGradeRow(BaseModel):
     fiscal_year: int
     grade: str
@@ -54,6 +62,7 @@ class H1BGraderProfile(BaseModel):
     uscis_approvals: list[AnnualCountRow] = Field(default_factory=list)
     uscis_approval_rates: list[AnnualRateRow] = Field(default_factory=list)
     h1b_salaries: list[AnnualSalaryRow] = Field(default_factory=list)
+    job_titles: list[JobTitleRow] = Field(default_factory=list)
     grade: GradeProfile | None = None
 
 

@@ -3,7 +3,13 @@ from typing import Any
 
 from bs4 import BeautifulSoup
 
-from h1b_mcp.models import AnnualCountRow, AnnualRateRow, AnnualSalaryRow, H1BGraderProfile
+from h1b_mcp.models import (
+    AnnualCountRow,
+    AnnualRateRow,
+    AnnualSalaryRow,
+    H1BGraderProfile,
+    JobTitleRow,
+)
 from h1b_mcp.parsers.grade import parse_grade_profile
 
 LCA_COUNT_COLUMNS = ("certified", "certified_withdrawn", "withdrawn", "denied")
@@ -25,6 +31,7 @@ def parse_h1bgrader_profile(page_source: str) -> H1BGraderProfile:
         uscis_approvals=parse_uscis_approvals(page_source),
         uscis_approval_rates=parse_uscis_approval_rates(page_source),
         h1b_salaries=parse_h1b_salaries(page_source),
+        job_titles=parse_job_titles(page_source),
         grade=parse_grade_profile(page_source),
     )
 
@@ -45,6 +52,18 @@ def parse_h1bgrader_profile_html(html: str) -> H1BGraderProfile:
             find_table(tables, "USCIS H1B Approval & Denial Rates")
         ),
         h1b_salaries=parse_salary_table(find_table(tables, "H1B Salaries")),
+        job_titles=parse_job_title_table(
+            find_table_with_headers(
+                tables,
+                (
+                    "H1B Job Title",
+                    "LCA Count",
+                    "Maximum Salary",
+                    "Average Salary",
+                    "Minimum Salary",
+                ),
+            )
+        ),
         grade=parse_grade_profile(html),
     )
 
@@ -76,6 +95,19 @@ def find_table(tables: list[list[list[str]]], title: str) -> list[list[str]]:
         table_text = " ".join(" ".join(row) for row in table)
         if normalized_title in normalize_header(table_text):
             return table
+    return []
+
+
+def find_table_with_headers(
+    tables: list[list[list[str]]],
+    headers: tuple[str, ...],
+) -> list[list[str]]:
+    normalized_headers = {normalize_header(header) for header in headers}
+    for table in tables:
+        for row in table:
+            normalized_row = {normalize_header(cell) for cell in row}
+            if normalized_headers.issubset(normalized_row):
+                return table
     return []
 
 
@@ -170,6 +202,23 @@ def parse_salary_table(table: list[list[str]]) -> list[AnnualSalaryRow]:
     return rows
 
 
+def parse_job_title_table(table: list[list[str]]) -> list[JobTitleRow]:
+    rows: list[JobTitleRow] = []
+    for row in table:
+        if len(row) < 5 or not row[0] or not re.fullmatch(r"[\d,]+", row[1]):
+            continue
+        rows.append(
+            JobTitleRow(
+                title=row[0],
+                lca_count=parse_int_cell(row[1]),
+                maximum_salary=parse_money_cell(row[2]),
+                average_salary=parse_money_cell(row[3]),
+                minimum_salary=parse_money_cell(row[4]),
+            )
+        )
+    return rows
+
+
 def parse_lca_approvals(body_text: str) -> list[AnnualCountRow]:
     return parse_count_table_from_text(
         body_text,
@@ -237,6 +286,37 @@ def parse_h1b_salaries(body_text: str) -> list[AnnualSalaryRow]:
                 fiscal_year=int(match.group(1)),
                 maximum_salary=parse_money_cell(match.group(2)),
                 median_salary=parse_money_cell(match.group(3)),
+                average_salary=parse_money_cell(match.group(4)),
+                minimum_salary=parse_money_cell(match.group(5)),
+            )
+        )
+    return rows
+
+
+def parse_job_titles(body_text: str) -> list[JobTitleRow]:
+    start_marker = "H1B Job Title LCA Count Maximum Salary Average Salary Minimum Salary"
+    section = table_section(
+        body_text,
+        start_marker=start_marker,
+        end_markers=(
+            "View Latest H1B",
+            "Grade Insights",
+            "H1BGrader About",
+        ),
+    )
+    if section.startswith(start_marker):
+        section = section[len(start_marker) :]
+    rows: list[JobTitleRow] = []
+    for match in re.finditer(
+        r"(.+?)\s+([\d,]+)\s+(\$[\d,]+|-|N/A)\s+(\$[\d,]+|-|N/A)\s+"
+        r"(\$[\d,]+|-|N/A)(?=\s+[A-Z][A-Za-z&/()., -]+\s+[\d,]+\s+\$|\s*$)",
+        section,
+    ):
+        rows.append(
+            JobTitleRow(
+                title=match.group(1).strip(),
+                lca_count=parse_int_cell(match.group(2)),
+                maximum_salary=parse_money_cell(match.group(3)),
                 average_salary=parse_money_cell(match.group(4)),
                 minimum_salary=parse_money_cell(match.group(5)),
             )

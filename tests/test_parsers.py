@@ -141,6 +141,29 @@ def test_parse_h1bgrader_profile_extracts_profile_tables() -> None:
             "minimum_salary": 110000,
         },
     ]
+    assert [row.model_dump() for row in profile.job_titles] == [
+        {
+            "title": "Software Engineer",
+            "lca_count": 33,
+            "maximum_salary": 187741,
+            "average_salary": 160905,
+            "minimum_salary": 131997,
+        },
+        {
+            "title": "Sr Software Engineer",
+            "lca_count": 27,
+            "maximum_salary": 226138,
+            "average_salary": 192758,
+            "minimum_salary": 157000,
+        },
+        {
+            "title": "Solutions Architect",
+            "lca_count": 11,
+            "maximum_salary": 155522,
+            "average_salary": 142134,
+            "minimum_salary": 131082,
+        },
+    ]
     assert profile.grade is not None
     assert profile.grade.model_dump() == {
         "latest_grade": "A",
@@ -232,6 +255,22 @@ def test_parse_h1bgrader_profile_extracts_salary_table_from_text() -> None:
             "median_salary": 166962,
             "average_salary": 167569,
             "minimum_salary": 106558,
+        },
+    ]
+    assert [row.model_dump() for row in profile.job_titles] == [
+        {
+            "title": "Software Engineer",
+            "lca_count": 33,
+            "maximum_salary": 187741,
+            "average_salary": 160905,
+            "minimum_salary": 131997,
+        },
+        {
+            "title": "Sr Software Engineer",
+            "lca_count": 27,
+            "maximum_salary": 226138,
+            "average_salary": 192758,
+            "minimum_salary": 157000,
         },
     ]
 

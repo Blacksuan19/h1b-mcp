@@ -73,6 +73,24 @@ DATABRICKS_PROFILE_HTML = """
       <tr><td>2025</td><td>$325,000</td><td>$166,962</td><td>$167,569</td><td>$106,558</td></tr>
       <tr><td>2024</td><td>$285,500</td><td>$155,000</td><td>$165,360</td><td>$110,000</td></tr>
     </table>
+    <table>
+      <tr>
+        <th>H1B Job Title</th><th>LCA Count</th><th>Maximum Salary</th>
+        <th>Average Salary</th><th>Minimum Salary</th>
+      </tr>
+      <tr>
+        <td>Software Engineer</td><td>33</td><td>$187,741</td>
+        <td>$160,905</td><td>$131,997</td>
+      </tr>
+      <tr>
+        <td>Sr Software Engineer</td><td>27</td><td>$226,138</td>
+        <td>$192,758</td><td>$157,000</td>
+      </tr>
+      <tr>
+        <td>Solutions Architect</td><td>11</td><td>$155,522</td>
+        <td>$142,134</td><td>$131,082</td>
+      </tr>
+    </table>
     <div id="employer-grade">
       <div class="row justify-content-center mb-3">
         <div class="col-6 border rounded">
