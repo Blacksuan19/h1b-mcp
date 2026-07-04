@@ -18,6 +18,7 @@ def build_company_sponsorship_result(
     company_query: str,
     company_profile: CompanyProfile,
 ) -> CompanySponsorshipResult:
+    """Build the compact company-level tool response from the cached raw profile."""
     evidence = company_sponsorship_evidence(company_profile)
     return CompanySponsorshipResult(
         company_query=company_query,
@@ -34,6 +35,7 @@ def build_company_job_sponsorship_result(
     job_title: str,
     company_profile: CompanyProfile,
 ) -> CompanyJobSponsorshipResult:
+    """Answer whether this company has title-specific sponsorship evidence."""
     matches = match_job_titles(job_title, company_profile.profile.job_titles)
     company_signal = classify_company_sponsorship(company_profile)
     signal = classify_job_sponsorship(matches, company_signal)
@@ -94,6 +96,7 @@ def build_company_grade_result(
 
 
 def classify_company_sponsorship(company_profile: CompanyProfile) -> SponsorSignal:
+    """Classify company evidence using only parsed structured profile data."""
     profile = company_profile.profile
     if profile.lca_approvals:
         return "Strong signal"
@@ -110,6 +113,7 @@ def classify_job_sponsorship(
     matches: list[JobTitleMatch],
     company_signal: SponsorSignal,
 ) -> JobSponsorshipSignal:
+    """Preserve the distinction between title evidence and company-only evidence."""
     if any(match.match_type == "exact" for match in matches):
         return "Exact title evidence"
     if any(match.match_type == "close" for match in matches):
@@ -122,6 +126,7 @@ def classify_job_sponsorship(
 
 
 def company_sponsorship_evidence(company_profile: CompanyProfile) -> list[str]:
+    """Summarize the strongest parsed rows into human-readable evidence strings."""
     profile = company_profile.profile
     evidence: list[str] = []
 
@@ -172,6 +177,7 @@ def company_job_sponsorship_evidence(
     matches: list[JobTitleMatch],
     company_signal: SponsorSignal,
 ) -> list[str]:
+    """Explain the best title match without hiding the broader company signal."""
     if not matches:
         return [
             f"No sponsored job title row matched {job_title}.",

@@ -7,6 +7,7 @@ from h1b_mcp.models import AnnualGradeRow, GradeInsight, GradeProfile
 
 
 def parse_grade_profile(html: str) -> GradeProfile | None:
+    """Extract the grade tab, which is card/callout based rather than table based."""
     if not html.strip():
         return None
 
@@ -31,6 +32,7 @@ def parse_grade_profile(html: str) -> GradeProfile | None:
 
 
 def parse_annual_grades(section: Any) -> list[AnnualGradeRow]:
+    """Parse the small year-by-year grade cards near the top of the grade tab."""
     rows: list[AnnualGradeRow] = []
     for card in section.select("div.border.rounded"):
         text = compact_text(card)
@@ -61,6 +63,7 @@ def parse_confidence(section: Any) -> str | None:
 
 
 def parse_grade_insights(section: Any) -> list[GradeInsight]:
+    """Parse the explanatory grade callouts and their optional scores/status badges."""
     insights: list[GradeInsight] = []
     for callout in section.select(".bs-callout"):
         title_element = callout.find(["h1", "h2", "h3", "h4", "h5", "h6"])
@@ -85,6 +88,7 @@ def parse_grade_insights(section: Any) -> list[GradeInsight]:
 
 
 def parse_badge_status(callout: Any) -> str | None:
+    """Return semantic badges while ignoring numeric score badges like '99 / 100'."""
     for badge in callout.select(".badge"):
         value = compact_text(badge)
         if value and not re.fullmatch(r"\d{1,3}\s*/\s*\d{1,3}", value):
@@ -100,6 +104,7 @@ def parse_score(value: str) -> tuple[int | None, int | None]:
 
 
 def parse_sentiment(callout: Any) -> str | None:
+    """Map Bootstrap callout classes to a stable sentiment label."""
     classes = set(callout.get("class") or [])
     if "bs-callout-success" in classes:
         return "positive"

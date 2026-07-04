@@ -14,6 +14,8 @@ INDEX_FILENAME = "index.json"
 
 
 class CompanyProfileCache:
+    """Disk cache keyed by normalized company aliases and guarded by schema version and TTL."""
+
     def __init__(self, settings: Settings) -> None:
         self._cache_dir = settings.cache_dir
         self._ttl = timedelta(seconds=settings.cache_ttl_seconds)
@@ -84,6 +86,7 @@ class CompanyProfileCache:
 
 
 def profile_aliases(profile: CompanyProfile) -> set[str]:
+    """Return every stable lookup key that should point at the same cached profile."""
     aliases = {
         cache_key(profile.company_query),
         cache_key(profile.matched_company or ""),
@@ -93,18 +96,22 @@ def profile_aliases(profile: CompanyProfile) -> set[str]:
 
 
 def first_alias(aliases: set[str]) -> str:
+    """Choose a deterministic filename owner from a set of equivalent cache aliases."""
     return sorted(aliases)[0] if aliases else ""
 
 
 def cache_key(value: str) -> str:
+    """Use the same normalization for cache lookup as company-name matching."""
     return normalize_company_name(value)
 
 
 def profile_filename(key: str) -> str:
+    """Keep cache filenames short and filesystem-safe without exposing raw company names."""
     digest = sha256(key.encode("utf-8")).hexdigest()[:20]
     return f"{digest}.json"
 
 
 def url_slug(url: str) -> str:
+    """Extract H1BGrader's profile slug so URL-derived aliases survive query changes."""
     path = urlparse(url).path.rstrip("/")
     return path.rsplit("/", 1)[-1] if path else ""

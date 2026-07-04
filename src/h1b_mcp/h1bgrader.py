@@ -19,6 +19,8 @@ from h1b_mcp.utils import is_challenge_page, seleniumbase_timeout_multiplier
 
 
 class H1BGraderClient:
+    """Browser-backed client for fetching and parsing live H1BGrader company pages."""
+
     def __init__(self, settings: Settings) -> None:
         self._settings = settings
 
@@ -32,6 +34,7 @@ class H1BGraderClient:
         *,
         logger: LogSink | None = None,
     ) -> CompanyProfile:
+        """Run the SeleniumBase flow in a worker thread and return a parsed profile."""
         company_name = company_name.strip()
         if not company_name:
             raise ValueError("company_name cannot be empty")
@@ -50,6 +53,7 @@ class H1BGraderClient:
         company_name: str,
         logger: ThreadLogBridge,
     ) -> CompanyProfile:
+        """Search H1BGrader, open profile tabs, and parse the final browser state."""
         self._settings.profile_dir.mkdir(parents=True, exist_ok=True)
         with SB(
             browser="chrome",
@@ -105,6 +109,7 @@ class H1BGraderClient:
             return company_profile
 
     def _open_salary_tab(self, sb: Any, logger: ThreadLogBridge) -> None:
+        """Open the salary tab when present so its table appears in page source."""
         if not sb.is_element_visible(COMPANY_SALARIES_TAB_SELECTOR):
             logger.warning("H1BGrader salaries tab was not visible; parsing current profile HTML.")
             return
@@ -115,6 +120,7 @@ class H1BGraderClient:
         self._raise_if_challenged(sb)
 
     def _open_grade_tab(self, sb: Any, logger: ThreadLogBridge) -> None:
+        """Open the grade tab when present so card-based grade data can be parsed."""
         if not sb.is_element_visible(COMPANY_GRADE_TAB_SELECTOR):
             logger.warning("H1BGrader grade tab was not visible; parsing current profile HTML.")
             return
@@ -125,6 +131,7 @@ class H1BGraderClient:
         self._raise_if_challenged(sb)
 
     def _open_job_titles_tab(self, sb: Any, logger: ThreadLogBridge) -> None:
+        """Open the job titles tab when present so the large title table is loaded."""
         if not sb.is_element_visible(COMPANY_JOB_TITLES_TAB_SELECTOR):
             logger.warning(
                 "H1BGrader job titles tab was not visible; parsing current profile HTML."
@@ -137,6 +144,7 @@ class H1BGraderClient:
         self._raise_if_challenged(sb)
 
     def _raise_if_challenged(self, sb: Any) -> None:
+        """Fail fast on Cloudflare/verification pages instead of parsing block text."""
         title = sb.get_title()
         body_text = self._body_text(sb)
         url = sb.get_current_url()

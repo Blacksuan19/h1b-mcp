@@ -24,6 +24,7 @@ def summarize_h1bgrader_profile(
     body_text: str,
     html: str | None = None,
 ) -> H1BLookupResult:
+    """Parse a fetched company page and build the older all-in-one lookup result."""
     company_profile = extract_h1bgrader_company_profile(
         company_query=company_query,
         matched_company=matched_company,
@@ -47,6 +48,7 @@ def extract_h1bgrader_company_profile(
     html: str | None = None,
     fetched_at: datetime | None = None,
 ) -> CompanyProfile:
+    """Build the cacheable raw profile object from the current H1BGrader page state."""
     compact = re.sub(r"\s+", " ", body_text).strip()
     profile = parse_h1bgrader_profile(html or compact)
 
@@ -66,6 +68,7 @@ def build_h1b_lookup_result(
     company_profile: CompanyProfile,
     body_text: str | None = None,
 ) -> H1BLookupResult:
+    """Convert a parsed profile into the legacy sponsorship signal response."""
     evidence: list[str] = []
     profile = company_profile.profile
     compact = re.sub(r"\s+", " ", body_text or "").strip()
@@ -124,6 +127,7 @@ def classify_company_profile(
     *,
     body_text: str = "",
 ) -> SponsorSignal:
+    """Prefer structured profile evidence over ambiguous marketing-page text."""
     if NO_SPONSOR_RE.search(body_text):
         return "No sponsor"
     if company_profile.profile.lca_approvals:
@@ -140,6 +144,7 @@ def classify_company_profile(
 
 
 def has_profile_data(profile: H1BGraderProfile) -> bool:
+    """Check whether a parsed profile contains any useful table or grade data."""
     return bool(
         profile.lca_approvals
         or profile.lca_approval_rates
@@ -152,6 +157,7 @@ def has_profile_data(profile: H1BGraderProfile) -> bool:
 
 
 def latest_nonzero_count_row(rows: list[AnnualCountRow]) -> AnnualCountRow | None:
+    """Use the newest meaningful row while tolerating current-year zero placeholders."""
     for row in rows:
         if any(row.counts.values()):
             return row

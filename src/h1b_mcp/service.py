@@ -9,6 +9,8 @@ from h1b_mcp.settings import Settings
 
 
 class CompanyProfileFetcher(Protocol):
+    """Small client protocol that lets tests swap out the live browser fetcher."""
+
     async def fetch_company_profile(
         self,
         company_name: str,
@@ -19,6 +21,8 @@ class CompanyProfileFetcher(Protocol):
 
 
 class H1BGraderService:
+    """Coordinates cache reuse, live H1BGrader fetches, and profile-level responses."""
+
     def __init__(
         self,
         settings: Settings,
@@ -36,6 +40,7 @@ class H1BGraderService:
         force_refresh: bool = False,
         logger: LogSink | None = None,
     ) -> H1BLookupResult:
+        """Build the legacy sponsorship lookup response from the shared company profile cache."""
         await log_message(logger, "info", f"Checking H-1B sponsorship for {company_name}.")
         company_profile = await self.get_company_profile(
             company_name,
@@ -55,6 +60,7 @@ class H1BGraderService:
         force_refresh: bool = False,
         logger: LogSink | None = None,
     ) -> CompanyProfile:
+        """Return a fresh cached profile or fetch, parse, and cache a live H1BGrader page."""
         company_name = company_name.strip()
         if not company_name:
             raise ValueError("company_name cannot be empty")

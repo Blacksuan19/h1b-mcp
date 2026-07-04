@@ -22,6 +22,7 @@ USCIS_COUNT_COLUMNS = (
 
 
 def parse_h1bgrader_profile(page_source: str) -> H1BGraderProfile:
+    """Parse either full HTML or SeleniumBase body text captured from a company page."""
     if "<table" in page_source.lower():
         return parse_h1bgrader_profile_html(page_source)
 
@@ -37,6 +38,7 @@ def parse_h1bgrader_profile(page_source: str) -> H1BGraderProfile:
 
 
 def parse_h1bgrader_profile_html(html: str) -> H1BGraderProfile:
+    """Extract company-profile tables from HTML using table titles and header signatures."""
     tables = extract_html_tables(html)
     return H1BGraderProfile(
         lca_approvals=parse_count_table(
@@ -69,6 +71,7 @@ def parse_h1bgrader_profile_html(html: str) -> H1BGraderProfile:
 
 
 def extract_html_tables(html: str) -> list[list[list[str]]]:
+    """Convert Beautiful Soup tables into normalized row/cell matrices."""
     soup = BeautifulSoup(html, "html.parser")
     tables: list[list[list[str]]] = []
     for table in soup.find_all("table"):
@@ -90,6 +93,7 @@ def cell_text(value: Any) -> str:
 
 
 def find_table(tables: list[list[list[str]]], title: str) -> list[list[str]]:
+    """Find a table by title text when H1BGrader includes a caption or grouped header."""
     normalized_title = normalize_header(title)
     for table in tables:
         table_text = " ".join(" ".join(row) for row in table)
@@ -102,6 +106,7 @@ def find_table_with_headers(
     tables: list[list[list[str]]],
     headers: tuple[str, ...],
 ) -> list[list[str]]:
+    """Find tables whose headers are safer identifiers than nearby page text."""
     normalized_headers = {normalize_header(header) for header in headers}
     for table in tables:
         for row in table:
@@ -116,10 +121,12 @@ def normalize_header(value: str) -> str:
 
 
 def data_rows(table: list[list[str]]) -> list[list[str]]:
+    """Return annual rows and skip caption/header/footer rows."""
     return [row for row in table if row and re.fullmatch(r"20\d{2}", row[0])]
 
 
 def parse_count_table(table: list[list[str]], column_keys: tuple[str, ...]) -> list[AnnualCountRow]:
+    """Parse annual count tables that share the same year-plus-counts shape."""
     rows: list[AnnualCountRow] = []
     for row in data_rows(table):
         if len(row) < len(column_keys) + 1:
@@ -143,6 +150,7 @@ def parse_count_table_from_text(
     end_markers: tuple[str, ...],
     column_keys: tuple[str, ...],
 ) -> list[AnnualCountRow]:
+    """Fallback parser for Selenium text when HTML tables are unavailable or incomplete."""
     section = table_section(
         body_text,
         start_marker=start_marker,
@@ -203,6 +211,7 @@ def parse_salary_table(table: list[list[str]]) -> list[AnnualSalaryRow]:
 
 
 def parse_job_title_table(table: list[list[str]]) -> list[JobTitleRow]:
+    """Parse title rows while ignoring header rows and non-count table content."""
     rows: list[JobTitleRow] = []
     for row in table:
         if len(row) < 5 or not row[0] or not re.fullmatch(r"[\d,]+", row[1]):
@@ -266,6 +275,7 @@ def parse_uscis_approval_rates(body_text: str) -> list[AnnualRateRow]:
 
 
 def parse_h1b_salaries(body_text: str) -> list[AnnualSalaryRow]:
+    """Fallback salary parser for the tab text SeleniumBase exposes after clicking salaries."""
     section = table_section(
         body_text,
         start_marker="H1B Salaries Fiscal Year* Maximum Median Average Minimum",
@@ -294,6 +304,7 @@ def parse_h1b_salaries(body_text: str) -> list[AnnualSalaryRow]:
 
 
 def parse_job_titles(body_text: str) -> list[JobTitleRow]:
+    """Fallback job-title parser for flattened text from the job titles tab."""
     start_marker = "H1B Job Title LCA Count Maximum Salary Average Salary Minimum Salary"
     section = table_section(
         body_text,
@@ -330,6 +341,7 @@ def parse_rate_table_from_text(
     start_marker: str,
     end_markers: tuple[str, ...],
 ) -> list[AnnualRateRow]:
+    """Fallback parser for annual approval-rate rows in flattened page text."""
     section = table_section(body_text, start_marker=start_marker, end_markers=end_markers)
     rows: list[AnnualRateRow] = []
     for match in re.finditer(r"\b(20\d{2})\s+([\d.]+%|N/A)\s+([\d.]+%|N/A)", section):
@@ -344,6 +356,7 @@ def parse_rate_table_from_text(
 
 
 def table_section(body_text: str, *, start_marker: str, end_markers: tuple[str, ...]) -> str:
+    """Slice a flattened page down to one logical table using surrounding headings."""
     start = body_text.find(start_marker)
     if start < 0:
         return ""

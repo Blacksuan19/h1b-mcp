@@ -19,6 +19,8 @@ T = TypeVar("T", bound=BaseModel)
 
 
 def register_company_tools(mcp: FastMCP) -> None:
+    """Register all company-profile-backed tools on a FastMCP server instance."""
+
     @mcp.tool()
     async def check_h1b_sponsorship(company_name: str, ctx: Context) -> dict[str, Any]:
         """Check whether a company has H-1B sponsorship evidence."""
@@ -107,6 +109,7 @@ async def run_company_profile_tool(
     action_name: str,
     transform: Callable[[Any], T],
 ) -> dict[str, Any]:
+    """Fetch the shared company profile once, then project it into a tool response."""
     async def action(service: H1BGraderService) -> T:
         company_profile = await service.get_company_profile(company_name, logger=ctx)
         return transform(company_profile)
@@ -127,6 +130,7 @@ async def run_company_tool(
     action: Callable[[H1BGraderService], Awaitable[T]],
     transform: Callable[[T], BaseModel] | None = None,
 ) -> dict[str, Any]:
+    """Common MCP wrapper for logging, service construction, and blocked payloads."""
     service = H1BGraderService(settings)
     try:
         await ctx.info(f"Starting {action_name} for {company_name}.")
@@ -147,6 +151,7 @@ async def run_company_tool(
 
 
 def blocked_payload(*, company_name: str, url: str | None, message: str) -> dict[str, Any]:
+    """Return a consistent payload when no reliable parsed profile can be produced."""
     return {
         "company_query": company_name,
         "signal": "Blocked",

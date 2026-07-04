@@ -7,6 +7,8 @@ LogLevel = Literal["debug", "info", "warning", "error"]
 
 
 class LogSink(Protocol):
+    """Subset of the FastMCP context logging API used throughout the package."""
+
     async def debug(self, message: str) -> None:
         ...
 
@@ -21,12 +23,15 @@ class LogSink(Protocol):
 
 
 async def log_message(logger: LogSink | None, level: LogLevel, message: str) -> None:
+    """Log only when a context/logger was provided by the caller."""
     if logger is None:
         return
     await getattr(logger, level)(message)
 
 
 class ThreadLogBridge:
+    """Forward synchronous Selenium thread logs onto the async MCP event loop."""
+
     def __init__(
         self,
         logger: LogSink | None,
@@ -61,5 +66,6 @@ class ThreadLogBridge:
 
 
 def ignore_logging_error(future: Future[Any]) -> None:
+    """Keep best-effort logging failures from breaking a browser fetch."""
     with suppress(Exception):
         future.result()
