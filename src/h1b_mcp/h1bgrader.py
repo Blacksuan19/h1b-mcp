@@ -4,6 +4,7 @@ from typing import Any
 from seleniumbase import SB  # type: ignore[reportMissingTypeStubs]
 
 from h1b_mcp.constants import (
+    COMPANY_GRADE_TAB_SELECTOR,
     COMPANY_INPUT_SELECTOR,
     COMPANY_PROFILE_PATH_RE,
     COMPANY_SALARIES_TAB_SELECTOR,
@@ -89,6 +90,7 @@ class H1BGraderClient:
                 )
 
             self._open_salary_tab(sb, logger)
+            self._open_grade_tab(sb, logger)
             logger.info("Parsing H1BGrader company profile tables.")
             company_profile = extract_h1bgrader_company_profile(
                 company_query=company_name,
@@ -107,6 +109,16 @@ class H1BGraderClient:
 
         logger.info("Opening H1B salaries tab.")
         sb.click(COMPANY_SALARIES_TAB_SELECTOR)
+        sb.sleep(2)
+        self._raise_if_challenged(sb)
+
+    def _open_grade_tab(self, sb: Any, logger: ThreadLogBridge) -> None:
+        if not sb.is_element_visible(COMPANY_GRADE_TAB_SELECTOR):
+            logger.warning("H1BGrader grade tab was not visible; parsing current profile HTML.")
+            return
+
+        logger.info("Opening H1B grade tab.")
+        sb.click(COMPANY_GRADE_TAB_SELECTOR)
         sb.sleep(2)
         self._raise_if_challenged(sb)
 

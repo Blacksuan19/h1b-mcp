@@ -73,6 +73,63 @@ DATABRICKS_PROFILE_HTML = """
       <tr><td>2025</td><td>$325,000</td><td>$166,962</td><td>$167,569</td><td>$106,558</td></tr>
       <tr><td>2024</td><td>$285,500</td><td>$155,000</td><td>$165,360</td><td>$110,000</td></tr>
     </table>
+    <div id="employer-grade">
+      <div class="row justify-content-center mb-3">
+        <div class="col-6 border rounded">
+          <p>2022 Grade</p><h3>A</h3><p>Oct 2021 - Sep 2022</p>
+        </div>
+        <div class="col-6 border rounded">
+          <p>2023 Grade</p><h3>A</h3><p>Oct 2022 - Sep 2023</p>
+        </div>
+        <div class="col-6 border rounded">
+          <p>2024 Grade</p><h3>A</h3><p>Oct 2023 - Sep 2024</p>
+        </div>
+        <div class="col-6 border rounded">
+          <p><span class="confidence confidence-high">High Confidence</span></p>
+        </div>
+      </div>
+      <div class="bs-callout bs-callout-success">
+        <h4>Data availability - Very High Confidence to Grade Databricks INC</h4>
+        <p>
+          Based on data availability for H1B approvals with USCIS, Databricks INC
+          meets our data availability criteria with a data availability score of
+          100 / 100. Also, for H1B Labor Condition Applications(LCAs) data filed
+          with US Department of Labor(DOL) as well, it meets our data criteria
+          with a score of 100 / 100.
+        </p>
+      </div>
+      <div class="bs-callout bs-callout-success">
+        <h4>Great H1B LCA Success Record for Databricks INC</h4>
+        <p>
+          Based on total number of H1B Labor Condition Applications(LCAs) filed
+          with US Department of Labor(DOL), Databricks INC had an overall approval
+          rate of 99 / 100.
+        </p>
+      </div>
+      <div class="bs-callout bs-callout-success">
+        <h4>Great USCIS H1B Approvals Record for Databricks INC</h4>
+        <p>
+          Based on total number of H1B Petitions filed with USCIS for new and
+          continuing employment categories of applications, Databricks INC had an
+          overall approval rate of 99 / 100.
+        </p>
+      </div>
+      <div class="bs-callout bs-callout-success">
+        <h4>Databricks INC is not a H1B Dependent Employer</h4>
+        <p>
+          Based on the ratio of total number of employees to H1B Employees in the
+          company, Databricks INC is classified as
+          <span class="badge badge-success">NOT a H1B Dependent Employer</span>.
+        </p>
+      </div>
+      <div class="bs-callout bs-callout-success">
+        <h4>Databricks INC is not a Willful Violator</h4>
+        <p>
+          US Department of Labor(DOL) Classified Databricks INC as
+          <span class="badge badge-success">NOT a Willful violator</span>.
+        </p>
+      </div>
+    </div>
   </body>
 </html>
 """

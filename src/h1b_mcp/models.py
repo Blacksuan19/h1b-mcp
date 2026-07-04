@@ -26,12 +26,35 @@ class AnnualSalaryRow(BaseModel):
     minimum_salary: int | None = None
 
 
+class AnnualGradeRow(BaseModel):
+    fiscal_year: int
+    grade: str
+    period: str | None = None
+
+
+class GradeInsight(BaseModel):
+    title: str
+    description: str
+    score: int | None = None
+    score_max: int | None = None
+    status: str | None = None
+    sentiment: str | None = None
+
+
+class GradeProfile(BaseModel):
+    latest_grade: str | None = None
+    confidence: str | None = None
+    annual_grades: list[AnnualGradeRow] = Field(default_factory=list)
+    insights: list[GradeInsight] = Field(default_factory=list)
+
+
 class H1BGraderProfile(BaseModel):
     lca_approvals: list[AnnualCountRow] = Field(default_factory=list)
     lca_approval_rates: list[AnnualRateRow] = Field(default_factory=list)
     uscis_approvals: list[AnnualCountRow] = Field(default_factory=list)
     uscis_approval_rates: list[AnnualRateRow] = Field(default_factory=list)
     h1b_salaries: list[AnnualSalaryRow] = Field(default_factory=list)
+    grade: GradeProfile | None = None
 
 
 class CompanyProfile(BaseModel):

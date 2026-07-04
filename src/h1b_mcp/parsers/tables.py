@@ -4,6 +4,7 @@ from typing import Any
 from bs4 import BeautifulSoup
 
 from h1b_mcp.models import AnnualCountRow, AnnualRateRow, AnnualSalaryRow, H1BGraderProfile
+from h1b_mcp.parsers.grade import parse_grade_profile
 
 LCA_COUNT_COLUMNS = ("certified", "certified_withdrawn", "withdrawn", "denied")
 USCIS_COUNT_COLUMNS = (
@@ -24,6 +25,7 @@ def parse_h1bgrader_profile(page_source: str) -> H1BGraderProfile:
         uscis_approvals=parse_uscis_approvals(page_source),
         uscis_approval_rates=parse_uscis_approval_rates(page_source),
         h1b_salaries=parse_h1b_salaries(page_source),
+        grade=parse_grade_profile(page_source),
     )
 
 
@@ -43,6 +45,7 @@ def parse_h1bgrader_profile_html(html: str) -> H1BGraderProfile:
             find_table(tables, "USCIS H1B Approval & Denial Rates")
         ),
         h1b_salaries=parse_salary_table(find_table(tables, "H1B Salaries")),
+        grade=parse_grade_profile(html),
     )
 
 

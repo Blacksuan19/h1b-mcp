@@ -18,6 +18,7 @@ def test_summarize_profile_classifies_strong_signal() -> None:
         "173 certified LCA filings and 0 denials in fiscal year 2026" in item
         for item in result.evidence
     )
+    assert any("latest grade A with high confidence" in item for item in result.evidence)
     assert result.profile is not None
     assert result.profile.lca_approvals[0].model_dump() == {
         "fiscal_year": 2026,
@@ -140,6 +141,78 @@ def test_parse_h1bgrader_profile_extracts_profile_tables() -> None:
             "minimum_salary": 110000,
         },
     ]
+    assert profile.grade is not None
+    assert profile.grade.model_dump() == {
+        "latest_grade": "A",
+        "confidence": "High Confidence",
+        "annual_grades": [
+            {"fiscal_year": 2024, "grade": "A", "period": "Oct 2023 - Sep 2024"},
+            {"fiscal_year": 2023, "grade": "A", "period": "Oct 2022 - Sep 2023"},
+            {"fiscal_year": 2022, "grade": "A", "period": "Oct 2021 - Sep 2022"},
+        ],
+        "insights": [
+            {
+                "title": "Data availability - Very High Confidence to Grade Databricks INC",
+                "description": (
+                    "Based on data availability for H1B approvals with USCIS, Databricks INC "
+                    "meets our data availability criteria with a data availability score of "
+                    "100 / 100. Also, for H1B Labor Condition Applications(LCAs) data filed "
+                    "with US Department of Labor(DOL) as well, it meets our data criteria "
+                    "with a score of 100 / 100."
+                ),
+                "score": 100,
+                "score_max": 100,
+                "status": None,
+                "sentiment": "positive",
+            },
+            {
+                "title": "Great H1B LCA Success Record for Databricks INC",
+                "description": (
+                    "Based on total number of H1B Labor Condition Applications(LCAs) filed "
+                    "with US Department of Labor(DOL), Databricks INC had an overall approval "
+                    "rate of 99 / 100."
+                ),
+                "score": 99,
+                "score_max": 100,
+                "status": None,
+                "sentiment": "positive",
+            },
+            {
+                "title": "Great USCIS H1B Approvals Record for Databricks INC",
+                "description": (
+                    "Based on total number of H1B Petitions filed with USCIS for new and "
+                    "continuing employment categories of applications, Databricks INC had an "
+                    "overall approval rate of 99 / 100."
+                ),
+                "score": 99,
+                "score_max": 100,
+                "status": None,
+                "sentiment": "positive",
+            },
+            {
+                "title": "Databricks INC is not a H1B Dependent Employer",
+                "description": (
+                    "Based on the ratio of total number of employees to H1B Employees in the "
+                    "company, Databricks INC is classified as NOT a H1B Dependent Employer ."
+                ),
+                "score": None,
+                "score_max": None,
+                "status": "NOT a H1B Dependent Employer",
+                "sentiment": "positive",
+            },
+            {
+                "title": "Databricks INC is not a Willful Violator",
+                "description": (
+                    "US Department of Labor(DOL) Classified Databricks INC as "
+                    "NOT a Willful violator ."
+                ),
+                "score": None,
+                "score_max": None,
+                "status": "NOT a Willful violator",
+                "sentiment": "positive",
+            },
+        ],
+    }
 
 
 def test_parse_h1bgrader_profile_extracts_salary_table_from_text() -> None:

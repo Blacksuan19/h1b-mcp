@@ -24,6 +24,7 @@ structured evidence.
 - Parsed annual USCIS H-1B approvals and denial counts.
 - Parsed annual USCIS approval and denial rates.
 - Parsed annual H-1B salary maximum, median, average, and minimum.
+- Parsed H1BGrader grade, confidence, annual grades, and grade insight cards.
 - Local company-profile cache so repeated checks can reuse parsed H1BGrader data.
 - Typed Pydantic response models that are easy for agents to consume.
 - Browser-block aware behavior that returns `Blocked` instead of inventing a
@@ -33,7 +34,7 @@ structured evidence.
 
 | Tool | Description | Output |
 | --- | --- | --- |
-| `check_h1b_sponsorship` | Search H1BGrader for a company and classify its sponsorship signal. | Company match, profile URL, evidence, and parsed annual LCA/USCIS/salary tables. |
+| `check_h1b_sponsorship` | Search H1BGrader for a company and classify its sponsorship signal. | Company match, profile URL, evidence, and parsed LCA/USCIS/salary/grade profile data. |
 
 ## Quick Start
 
@@ -159,7 +160,28 @@ Example response shape:
         "average_salary": 175681,
         "minimum_salary": 103646
       }
-    ]
+    ],
+    "grade": {
+      "latest_grade": "A",
+      "confidence": "High Confidence",
+      "annual_grades": [
+        {
+          "fiscal_year": 2024,
+          "grade": "A",
+          "period": "Oct 2023 - Sep 2024"
+        }
+      ],
+      "insights": [
+        {
+          "title": "Great H1B LCA Success Record for Databricks INC",
+          "description": "Databricks INC had an overall approval rate of 99 / 100.",
+          "score": 99,
+          "score_max": 100,
+          "status": null,
+          "sentiment": "positive"
+        }
+      ]
+    }
   }
 }
 ```
@@ -171,9 +193,10 @@ Example response shape:
 3. Searches the company name in the H1BGrader company search box.
 4. Selects the best dropdown result and navigates to the company profile.
 5. Parses the company profile HTML with Beautiful Soup.
-6. Opens the H1B salaries tab and extracts LCA, USCIS, and salary tables into typed models.
-7. Stores the parsed company profile locally for later tool calls.
-8. Builds a compact sponsorship signal with evidence.
+6. Opens the H1B salaries and grade tabs.
+7. Extracts LCA, USCIS, salary, grade, and grade insight data into typed models.
+8. Stores the parsed company profile locally for later tool calls.
+9. Builds a compact sponsorship signal with evidence.
 
 ## Signals
 

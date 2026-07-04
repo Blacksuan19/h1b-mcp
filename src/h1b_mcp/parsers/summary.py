@@ -116,7 +116,12 @@ def build_h1b_lookup_result(
             f"{approvals} approvals and {denials} denials "
             f"in fiscal year {uscis_row.fiscal_year}."
         )
-    if company_profile.grade:
+    if profile.grade and profile.grade.latest_grade:
+        grade_text = f"H1BGrader grade tab shows latest grade {profile.grade.latest_grade}"
+        if profile.grade.confidence:
+            grade_text += f" with {profile.grade.confidence.lower()}"
+        evidence.append(f"{grade_text}.")
+    elif company_profile.grade:
         evidence.append(f"H1BGrader text shows a grade or score of {company_profile.grade}.")
 
     signal = classify_company_profile(company_profile, evidence)

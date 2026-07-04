@@ -1,6 +1,6 @@
 import re
 
-COMPANY_PROFILE_CACHE_SCHEMA_VERSION = 2
+COMPANY_PROFILE_CACHE_SCHEMA_VERSION = 3
 COMPANY_INPUT_SELECTOR = (
     "input[placeholder*='Company' i], "
     "input[placeholder*='Search' i], "
@@ -13,6 +13,7 @@ COMPANY_INPUT_SELECTOR = (
 COMPANY_PROFILE_PATH_RE = re.compile(r"/h1b-sponsors/", re.I)
 COMPANY_SUGGESTION_SELECTOR = ".tt-menu.tt-open .tt-suggestion.tt-selectable"
 COMPANY_SALARIES_TAB_SELECTOR = "#employer-salaries-tab"
+COMPANY_GRADE_TAB_SELECTOR = "#employer-grade-tab"
 COMPANY_SUFFIXES = {
     "co",
     "company",
