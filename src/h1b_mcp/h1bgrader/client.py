@@ -18,11 +18,9 @@ from h1b_mcp.h1bgrader.lookups import (
 from h1b_mcp.logging import LogSink, ThreadLogBridge, log_message
 from h1b_mcp.models import (
     CompanyProfile,
-    H1BLookupResult,
     JobTitleProfile,
     LocationProfile,
 )
-from h1b_mcp.parsers.summary import build_h1b_lookup_result
 from h1b_mcp.settings import Settings
 
 TProfile = TypeVar("TProfile", CompanyProfile, JobTitleProfile, LocationProfile)
@@ -33,10 +31,6 @@ class H1BGraderClient:
 
     def __init__(self, settings: Settings) -> None:
         self._settings = settings
-
-    async def check_company(self, company_name: str) -> H1BLookupResult:
-        company_profile = await self.fetch_company_profile(company_name)
-        return build_h1b_lookup_result(company_query=company_name, company_profile=company_profile)
 
     async def fetch_company_profile(
         self,

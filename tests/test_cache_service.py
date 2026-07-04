@@ -100,13 +100,13 @@ def test_service_reuses_cached_company_profile(tmp_path: Path) -> None:
         fetcher = FakeProfileFetcher(databricks_company_profile())
         service = H1BGraderService(settings, client=fetcher)
 
-        first_result = await service.check_company("Databricks")
-        second_result = await service.check_company("Databricks Inc")
+        first_result = await service.get_company_profile("Databricks")
+        second_result = await service.get_company_profile("Databricks Inc")
 
         assert fetcher.calls == ["Databricks"]
-        assert first_result.signal == "Strong signal"
-        assert second_result.signal == "Strong signal"
-        assert second_result.matched_company == "DATABRICKS INC"
+        assert first_result.matched_name == "DATABRICKS INC"
+        assert second_result.matched_name == "DATABRICKS INC"
+        assert second_result.profile.lca_approvals[0].counts["certified"] == 173
 
     asyncio.run(run_check())
 
@@ -156,13 +156,12 @@ def test_service_logs_cache_and_fetch_steps(tmp_path: Path) -> None:
         fetcher = FakeProfileFetcher(databricks_company_profile())
         service = H1BGraderService(settings, client=fetcher)
 
-        await service.check_company("Databricks", logger=logger)
+        await service.get_company_profile("Databricks", logger=logger)
 
         messages = [message for _, message in logger.messages]
         assert fetcher.logger is logger
         assert "Checking local company profile cache." in messages
         assert "No fresh cache entry found; starting live lookup." in messages
         assert "Caching parsed H1BGrader company profile." in messages
-        assert "Building sponsorship signal from company profile." in messages
 
     asyncio.run(run_check())

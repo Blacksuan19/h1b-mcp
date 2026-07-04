@@ -7,8 +7,7 @@ from h1b_mcp.cache import (
 )
 from h1b_mcp.h1bgrader import H1BGraderClient
 from h1b_mcp.logging import LogSink, log_message
-from h1b_mcp.models import CompanyProfile, H1BLookupResult, JobTitleProfile, LocationProfile
-from h1b_mcp.parsers.summary import build_h1b_lookup_result
+from h1b_mcp.models import CompanyProfile, JobTitleProfile, LocationProfile
 from h1b_mcp.settings import Settings
 
 TProfile = TypeVar("TProfile", CompanyProfile, JobTitleProfile, LocationProfile)
@@ -72,26 +71,6 @@ class H1BGraderService:
             ttl_seconds=settings.cache_ttl_seconds,
             model_type=LocationProfile,
             aliases=profile_aliases,
-        )
-
-    async def check_company(
-        self,
-        company_name: str,
-        *,
-        force_refresh: bool = False,
-        logger: LogSink | None = None,
-    ) -> H1BLookupResult:
-        """Build the legacy sponsorship lookup response from the shared company profile cache."""
-        await log_message(logger, "info", f"Checking H-1B sponsorship for {company_name}.")
-        company_profile = await self.get_company_profile(
-            company_name,
-            force_refresh=force_refresh,
-            logger=logger,
-        )
-        await log_message(logger, "info", "Building sponsorship signal from company profile.")
-        return build_h1b_lookup_result(
-            company_query=company_name,
-            company_profile=company_profile,
         )
 
     async def get_company_profile(
