@@ -30,7 +30,6 @@ class CompanyProfile(BaseModel):
     matched_company: str | None = None
     url: str
     fetched_at: datetime
-    source: str = "H1BGrader live SeleniumBase UC search"
     sponsor_status: SponsorTextStatus | None = None
     reported_lca_count: int | None = None
     reported_lca_fiscal_year: int | None = None
@@ -42,10 +41,8 @@ class H1BLookupResult(BaseModel):
     company_query: str
     matched_company: str | None = None
     signal: SponsorSignal
-    source: str = "H1BGrader live SeleniumBase UC search"
     url: str | None = None
     evidence: list[str] = Field(default_factory=list)
-    caveats: list[str] = Field(default_factory=list)
     profile: H1BGraderProfile | None = None
 
 

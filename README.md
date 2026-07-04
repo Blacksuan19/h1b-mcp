@@ -32,7 +32,7 @@ structured evidence.
 
 | Tool | Description | Output |
 | --- | --- | --- |
-| `check_h1b_sponsorship` | Search H1BGrader for a company and classify its sponsorship signal. | Company match, profile URL, evidence, caveats, and parsed annual LCA/USCIS tables. |
+| `check_h1b_sponsorship` | Search H1BGrader for a company and classify its sponsorship signal. | Company match, profile URL, evidence, and parsed annual LCA/USCIS tables. |
 
 ## Quick Start
 
@@ -109,13 +109,9 @@ Example response shape:
   "company_query": "Databricks",
   "matched_company": "Databricks Inc",
   "signal": "Strong signal",
-  "source": "H1BGrader live SeleniumBase UC search",
   "url": "https://h1bgrader.com/h1b-sponsors/databricks-inc-nokpn1vn04",
   "evidence": [
     "H1BGrader LCA approvals table reports 173 certified LCA filings and 0 denials in fiscal year 2026."
-  ],
-  "caveats": [
-    "H1BGrader is a third-party source; verify against official filings before making immigration or employment decisions."
   ],
   "profile": {
     "lca_approvals": [
@@ -167,7 +163,7 @@ Example response shape:
 5. Parses the company profile HTML with Beautiful Soup.
 6. Extracts LCA and USCIS approval/denial tables into typed models.
 7. Stores the parsed company profile locally for later tool calls.
-8. Builds a compact sponsorship signal with evidence and caveats.
+8. Builds a compact sponsorship signal with evidence.
 
 ## Signals
 
@@ -183,7 +179,7 @@ Example response shape:
 
 H1BGrader may still present human verification, rate limits, or other bot
 protection. When that happens, `h1b-mcp` returns a `Blocked` result with a
-caveat instead of making a claim from memory.
+clear evidence message instead of making a claim from memory.
 
 The browser profile and company cache are stored at:
 

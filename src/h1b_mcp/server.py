@@ -31,10 +31,6 @@ async def check_h1b_sponsorship(company_name: str, ctx: Context) -> dict[str, An
             signal="Blocked",
             url=exc.url,
             evidence=[str(exc)],
-            caveats=[
-                "No sponsor conclusion was inferred because the live site blocked automation.",
-                "Retry later or verify the company manually on H1BGrader.",
-            ],
         )
     except Exception as exc:
         await ctx.error(f"Live H1BGrader lookup failed: {exc}")
@@ -42,11 +38,6 @@ async def check_h1b_sponsorship(company_name: str, ctx: Context) -> dict[str, An
             company_query=company_name,
             signal="Blocked",
             evidence=[f"Live H1BGrader lookup failed before a sponsor signal was parsed: {exc}"],
-            caveats=[
-                "No sponsor conclusion was inferred.",
-                "The site UI may have changed, the page may have timed out, or browser access "
-                "may require manual verification.",
-            ],
         )
     return result.model_dump(mode="json")
 

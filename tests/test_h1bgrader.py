@@ -274,7 +274,9 @@ def test_company_profile_cache_reads_by_company_alias(tmp_path: Path) -> None:
 def test_company_profile_cache_ignores_stale_entries(tmp_path: Path) -> None:
     settings = cache_settings(tmp_path, cache_ttl_seconds=60)
     cache = CompanyProfileCache(settings)
-    stale_profile = databricks_company_profile(fetched_at=datetime.now(UTC) - timedelta(hours=2))
+    stale_profile = databricks_company_profile(
+        fetched_at=datetime.now(UTC) - timedelta(hours=2)
+    )
 
     cache.set(stale_profile)
 

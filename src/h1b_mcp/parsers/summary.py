@@ -75,7 +75,6 @@ def build_h1b_lookup_result(
     *, company_query: str, company_profile: CompanyProfile
 ) -> H1BLookupResult:
     evidence: list[str] = []
-    caveats = ["Company-level history does not prove this specific role sponsors."]
     profile = company_profile.profile
 
     if company_profile.sponsor_status == "sponsors":
@@ -122,16 +121,13 @@ def build_h1b_lookup_result(
 
     if not evidence:
         evidence.append("Company page was opened, but no clear sponsor sentence was parsed.")
-        caveats.append("Open the returned URL manually before treating this as a sponsor signal.")
 
     return H1BLookupResult(
         company_query=company_query,
         matched_company=company_profile.matched_company,
         signal=signal,
-        source=company_profile.source,
         url=company_profile.url,
         evidence=evidence,
-        caveats=caveats,
         profile=profile if has_profile_data(profile) else None,
     )
 
