@@ -22,6 +22,11 @@ def test_company_profile_cache_reads_by_company_alias(tmp_path: Path) -> None:
     assert cached_profile is not None
     assert cached_profile.matched_company == "DATABRICKS INC"
     assert cached_profile.profile.lca_approvals[0].counts["certified"] == 173
+    cached_json = cached_profile.model_dump(mode="json")
+    assert "sponsor_status" not in cached_json
+    assert "reported_lca_count" not in cached_json
+    assert "reported_lca_fiscal_year" not in cached_json
+    assert "grade" not in cached_json
 
 
 def test_company_profile_cache_ignores_stale_entries(tmp_path: Path) -> None:

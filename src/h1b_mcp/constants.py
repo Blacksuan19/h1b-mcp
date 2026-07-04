@@ -1,6 +1,6 @@
 import re
 
-COMPANY_PROFILE_CACHE_SCHEMA_VERSION = 4
+COMPANY_PROFILE_CACHE_SCHEMA_VERSION = 5
 COMPANY_INPUT_SELECTOR = (
     "input[placeholder*='Company' i], "
     "input[placeholder*='Search' i], "
@@ -37,9 +37,6 @@ CHALLENGE_MARKERS = (
     "performing security verification",
 )
 
-FISCAL_YEAR_RE = re.compile(r"\b(?:fiscal year|fy)\s*(20\d{2})\b", re.I)
-GRADE_RE = re.compile(r"\b(?:grade|score)\b[:\s]+([A-F][+-]?)\b", re.I)
-LCA_COUNT_RE = re.compile(r"\b(?:filed|submitted)\b.{0,80}\b(\d[\d,]*)\b.{0,80}\bLCA", re.I | re.S)
 NO_SPONSOR_RE = re.compile(
     r"\b(?:does not|don't|do not|no)\b.{0,80}\bsponsor(?:s|ed|ing)?\b.{0,80}\bh-?1b\b",
     re.I | re.S,

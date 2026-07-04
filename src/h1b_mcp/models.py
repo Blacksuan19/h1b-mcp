@@ -4,7 +4,6 @@ from typing import Literal
 from pydantic import BaseModel, Field
 
 SponsorSignal = Literal["Strong signal", "Mixed signal", "Weak signal", "No sponsor", "Blocked"]
-SponsorTextStatus = Literal["sponsors", "does_not_sponsor"]
 
 
 class AnnualCountRow(BaseModel):
@@ -72,10 +71,6 @@ class CompanyProfile(BaseModel):
     matched_company: str | None = None
     url: str
     fetched_at: datetime
-    sponsor_status: SponsorTextStatus | None = None
-    reported_lca_count: int | None = None
-    reported_lca_fiscal_year: int | None = None
-    grade: str | None = None
     profile: H1BGraderProfile = Field(default_factory=H1BGraderProfile)
 
 

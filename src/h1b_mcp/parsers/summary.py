@@ -3,9 +3,6 @@ from datetime import UTC, datetime
 
 from h1b_mcp.constants import (
     COMPANY_PROFILE_CACHE_SCHEMA_VERSION,
-    FISCAL_YEAR_RE,
-    GRADE_RE,
-    LCA_COUNT_RE,
     NO_SPONSOR_RE,
     YES_SPONSOR_RE,
 )
@@ -34,7 +31,11 @@ def summarize_h1bgrader_profile(
         body_text=body_text,
         html=html,
     )
-    return build_h1b_lookup_result(company_query=company_query, company_profile=company_profile)
+    return build_h1b_lookup_result(
+        company_query=company_query,
+        company_profile=company_profile,
+        body_text=body_text,
+    )
 
 
 def extract_h1bgrader_company_profile(
@@ -49,50 +50,30 @@ def extract_h1bgrader_company_profile(
     compact = re.sub(r"\s+", " ", body_text).strip()
     profile = parse_h1bgrader_profile(html or compact)
 
-    lca_match = LCA_COUNT_RE.search(compact)
-    fy_match = FISCAL_YEAR_RE.search(compact)
-    grade_match = GRADE_RE.search(compact)
-
-    sponsor_status = None
-    if NO_SPONSOR_RE.search(compact):
-        sponsor_status = "does_not_sponsor"
-    elif YES_SPONSOR_RE.search(compact):
-        sponsor_status = "sponsors"
-
     return CompanyProfile(
         cache_schema_version=COMPANY_PROFILE_CACHE_SCHEMA_VERSION,
         company_query=company_query,
         matched_company=matched_company,
         url=url,
         fetched_at=fetched_at or datetime.now(UTC),
-        sponsor_status=sponsor_status,
-        reported_lca_count=parse_reported_lca_count(lca_match),
-        reported_lca_fiscal_year=int(fy_match.group(1)) if fy_match else None,
-        grade=grade_match.group(1).upper() if grade_match else None,
         profile=profile,
     )
 
 
 def build_h1b_lookup_result(
-    *, company_query: str, company_profile: CompanyProfile
+    *,
+    company_query: str,
+    company_profile: CompanyProfile,
+    body_text: str | None = None,
 ) -> H1BLookupResult:
     evidence: list[str] = []
     profile = company_profile.profile
+    compact = re.sub(r"\s+", " ", body_text or "").strip()
 
-    if company_profile.sponsor_status == "sponsors":
+    if YES_SPONSOR_RE.search(compact):
         evidence.append("H1BGrader profile text says the employer sponsors H-1B visas.")
-    if company_profile.sponsor_status == "does_not_sponsor":
+    if NO_SPONSOR_RE.search(compact):
         evidence.append("H1BGrader profile text says the employer does not sponsor H-1B visas.")
-    if company_profile.reported_lca_count is not None:
-        year_suffix = (
-            f" in fiscal year {company_profile.reported_lca_fiscal_year}"
-            if company_profile.reported_lca_fiscal_year
-            else ""
-        )
-        evidence.append(
-            f"H1BGrader text reports {company_profile.reported_lca_count:,} "
-            f"LCA filings{year_suffix}."
-        )
     if profile.lca_approvals:
         latest_lca_row = profile.lca_approvals[0]
         certified = latest_lca_row.counts.get("certified", 0)
@@ -121,10 +102,8 @@ def build_h1b_lookup_result(
         if profile.grade.confidence:
             grade_text += f" with {profile.grade.confidence.lower()}"
         evidence.append(f"{grade_text}.")
-    elif company_profile.grade:
-        evidence.append(f"H1BGrader text shows a grade or score of {company_profile.grade}.")
 
-    signal = classify_company_profile(company_profile, evidence)
+    signal = classify_company_profile(company_profile, evidence, body_text=compact)
 
     if not evidence:
         evidence.append("Company page was opened, but no clear sponsor sentence was parsed.")
@@ -139,37 +118,21 @@ def build_h1b_lookup_result(
     )
 
 
-def classify_signal(body_text: str, evidence: list[str]) -> SponsorSignal:
-    if NO_SPONSOR_RE.search(body_text):
-        return "No sponsor"
-    if YES_SPONSOR_RE.search(body_text) and LCA_COUNT_RE.search(body_text):
-        return "Strong signal"
-    if any("certified LCA filings" in item for item in evidence):
-        return "Strong signal"
-    if YES_SPONSOR_RE.search(body_text) or LCA_COUNT_RE.search(body_text):
-        return "Mixed signal"
-    if evidence:
-        return "Weak signal"
-    return "Weak signal"
-
-
 def classify_company_profile(
     company_profile: CompanyProfile,
     evidence: list[str],
+    *,
+    body_text: str = "",
 ) -> SponsorSignal:
-    if company_profile.sponsor_status == "does_not_sponsor":
+    if NO_SPONSOR_RE.search(body_text):
         return "No sponsor"
     if company_profile.profile.lca_approvals:
         return "Strong signal"
-    if (
-        company_profile.sponsor_status == "sponsors"
-        and company_profile.reported_lca_count is not None
-    ):
+    if company_profile.profile.uscis_approvals:
         return "Strong signal"
-    if (
-        company_profile.sponsor_status == "sponsors"
-        or company_profile.reported_lca_count is not None
-    ):
+    if company_profile.profile.job_titles:
+        return "Strong signal"
+    if YES_SPONSOR_RE.search(body_text):
         return "Mixed signal"
     if evidence:
         return "Weak signal"
@@ -183,13 +146,9 @@ def has_profile_data(profile: H1BGraderProfile) -> bool:
         or profile.uscis_approvals
         or profile.uscis_approval_rates
         or profile.h1b_salaries
+        or profile.job_titles
+        or profile.grade
     )
-
-
-def parse_reported_lca_count(match: re.Match[str] | None) -> int | None:
-    if not match:
-        return None
-    return int(match.group(1).replace(",", ""))
 
 
 def latest_nonzero_count_row(rows: list[AnnualCountRow]) -> AnnualCountRow | None:

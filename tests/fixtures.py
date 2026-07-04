@@ -202,6 +202,5 @@ def databricks_company_profile(*, fetched_at: datetime | None = None) -> Company
         matched_company="DATABRICKS INC",
         url=DATABRICKS_PROFILE_URL,
         fetched_at=fetched_at or datetime.now(UTC),
-        sponsor_status="sponsors",
         profile=parse_h1bgrader_profile(DATABRICKS_PROFILE_HTML),
     )
