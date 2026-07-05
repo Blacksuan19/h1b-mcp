@@ -517,62 +517,64 @@ Example response shape:
 
 ```mermaid
 flowchart TD
-    A[MCP client calls company tool] --> B[FastMCP tool handler]
-    B --> C[run_company_profile_tool]
-    C --> D[H1BGraderService.get_company_profile]
+    A[MCP client calls any H1B tool] --> B[FastMCP tool handler]
+    B --> C[tools.common run_tool or run_profile_tool]
+    C --> D[H1BGraderService]
 
-    D --> E{Fresh cache entry?}
-    E -->|Yes| F[Load CompanyProfile from local cache]
-    E -->|No| G[H1BGraderClient.fetch_company_profile]
+    D --> E{Profile type}
+    E --> F[get_company_profile]
+    E --> G[get_job_title_profile]
+    E --> H[get_location_profile]
 
-    G --> H[Launch SeleniumBase UC browser]
-    H --> I[Open H1BGrader homepage]
-    I --> J[Search company name]
-    J --> K[Click dropdown result]
-    K --> L[Open salaries, grade, and job-title tabs]
-    L --> M[Read body text and page source]
-    M --> N[Parse tables and grade data into CompanyProfile]
-    N --> O[Write CompanyProfile to cache]
+    F --> I{Fresh cache entry?}
+    G --> I
+    H --> I
 
-    F --> P[Response builder]
-    O --> P
-    P --> Q{Requested tool}
-    Q --> R[Company sponsorship signal]
-    Q --> S[Job-title sponsorship signal]
-    Q --> T[Full profile]
-    Q --> U[Job titles]
-    Q --> V[Salaries]
-    Q --> W[Grade insights]
+    I -->|Yes| J[Load typed profile from entity cache]
+    I -->|No| K[H1BGraderClient fetch_profile with lookup spec]
 
-    R --> X[Return JSON to MCP client]
-    S --> X
-    T --> X
-    U --> X
-    V --> X
-    W --> X
+    K --> L[Launch SeleniumBase UC homepage session]
+    L --> M[Open company, job-title, or city search tab]
+    M --> N[Type query into shared typeahead]
+    N --> O[Click selected dropdown result]
+    O --> P[Open profile tabs required by lookup spec]
+    P --> Q[Parse page source into typed profile model]
+    Q --> R[Write profile to matching cache]
 
-    G --> Y{Cloudflare or lookup failure?}
-    Y -->|Blocked or failed| Z[Return Blocked JSON with evidence]
+    J --> S[Focused response builder]
+    R --> S
 
-    A2[Job-title/location tool call] --> B2[Open job-title or city search tab]
-    B2 --> C2[Type query into shared typeahead]
-    C2 --> D2[Click typeahead suggestion]
-    D2 --> E2[Parse shared result tables]
-    E2 --> X
+    S --> T{Requested slice}
+    T --> U[Sponsorship signal]
+    T --> V[Role context]
+    T --> W[Full profile]
+    T --> X[Employers or job titles]
+    T --> Y[LCA or USCIS trends]
+    T --> Z[Salaries or grade]
+
+    U --> AA[Return structured Pydantic output]
+    V --> AA
+    W --> AA
+    X --> AA
+    Y --> AA
+    Z --> AA
+
+    K --> AB{Cloudflare or lookup failure?}
+    AB -->|Blocked or failed| AC[Raise MCP tool error with clear message]
 ```
 
 </details>
 
-1. A FastMCP tool receives a company-level request.
-2. The shared company tool runner creates an `H1BGraderService` and logs progress through the MCP context.
-3. The service checks the local company-profile cache for a fresh parsed profile.
-4. On cache hit, the cached `CompanyProfile` goes straight to the response builder.
-5. On cache miss, the SeleniumBase UC client opens H1BGrader, searches the company, and navigates to the matched profile.
-6. The client opens the salaries, grade, and job-title tabs before reading the page body and HTML.
-7. Parsers extract LCA, USCIS, salary, grade, grade insight, and job-title data into typed profile models.
-8. The service stores the parsed profile locally for later tool calls.
-9. The requested tool builds its focused JSON response from the same cached profile data.
-10. Job-title and location profile fetches use the same search tab/typeahead flow, then parse and cache the shared result-page tables.
+1. A FastMCP tool receives a company, job-title, or location request.
+2. The shared tool runner creates an `H1BGraderService` and logs progress through the MCP context.
+3. The service selects the matching profile cache and checks for a fresh parsed profile.
+4. On cache hit, the typed cached profile goes straight to the response builder.
+5. On cache miss, the SeleniumBase UC client opens H1BGrader and runs the lookup spec for the requested entity type.
+6. The lookup spec selects the correct search tab, typeahead input, expected URL pattern, tabs to open, and parser.
+7. Parsers extract the available LCA, USCIS, salary, grade, job-title, or employer data into typed profile models.
+8. The service stores the parsed profile in the matching local cache for later tool calls.
+9. The requested tool builds a focused Pydantic response from the same cached profile data.
+10. Browser blocks, missing suggestions, and unexpected lookup failures are surfaced as MCP tool errors with clear messages.
 
 ## Signals
 
