@@ -74,6 +74,8 @@ input and output schemas through `tools/list`.
 
 ## Quick Start
 
+Prerequisite: [install uv](https://docs.astral.sh/uv/getting-started/installation/) so `uvx` is available.
+
 Run the published package with `uvx`:
 
 ```bash
