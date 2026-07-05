@@ -72,20 +72,17 @@ input and output schemas through `tools/list`.
 | `get_h1b_location_lca_trends` | Return annual city LCA approval and denial trends. |
 | `get_h1b_location_salary` | Return annual H-1B salary history for a city. |
 
-## Quick Start
+## MCP Client Setup
 
 Prerequisite: [install uv](https://docs.astral.sh/uv/getting-started/installation/) so `uvx` is available.
 
-Run the published package with `uvx`:
-
-```bash
-uvx h1b-mcp@latest
-```
+Use `h1b-mcp` from an MCP-compatible client. The examples below run the
+published PyPI package with `uvx`.
 
 Lookups use SeleniumBase UC mode. The first lookup may download or prepare a
 compatible ChromeDriver automatically.
 
-## Codex Setup
+### Codex
 
 Add the server to your Codex MCP config:
 
@@ -104,6 +101,52 @@ codex mcp add h1b --env UV_HTTP_TIMEOUT=300 -- uvx h1b-mcp@latest
 ```
 
 Restart Codex and check `/mcp` to confirm the server is available.
+
+### Claude Desktop and Claude Code
+
+Add the server to your Claude Desktop or Claude Code MCP config. This same
+stdio shape also works for many other MCP-compatible clients:
+
+```json
+{
+  "mcpServers": {
+    "h1b": {
+      "command": "uvx",
+      "args": ["h1b-mcp@latest"],
+      "env": {
+        "UV_HTTP_TIMEOUT": "300"
+      }
+    }
+  }
+}
+```
+
+Or add it from Claude Code:
+
+```bash
+claude mcp add --env UV_HTTP_TIMEOUT=300 --transport stdio h1b -- uvx h1b-mcp@latest
+```
+
+Save the config and fully restart your MCP client so it starts the server.
+
+### VS Code
+
+Add the server through `MCP: Add Server`, or add it to `.vscode/mcp.json`:
+
+```json
+{
+  "servers": {
+    "h1b": {
+      "type": "stdio",
+      "command": "uvx",
+      "args": ["h1b-mcp@latest"],
+      "env": {
+        "UV_HTTP_TIMEOUT": "300"
+      }
+    }
+  }
+}
+```
 
 ## Local Development Setup
 
