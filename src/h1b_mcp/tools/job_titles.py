@@ -24,7 +24,7 @@ def register_job_title_tools(mcp: FastMCP) -> None:
         job_title: JobTitleQuery,
         ctx: Context,
     ) -> JobTitleSponsorshipResult:
-        """Check whether a job title has H-1B sponsorship evidence across employers."""
+        """Use to check whether a job title has H-1B activity across employers."""
         return await run_profile_tool(
             query=job_title,
             ctx=ctx,
@@ -41,7 +41,7 @@ def register_job_title_tools(mcp: FastMCP) -> None:
         job_title: JobTitleQuery,
         ctx: Context,
     ) -> JobTitleProfile:
-        """Return the full parsed H1BGrader job-title profile from cache or live fetch."""
+        """Use when answering requires the complete source-backed job-title profile."""
         return await run_profile_tool(
             query=job_title,
             ctx=ctx,
@@ -56,7 +56,7 @@ def register_job_title_tools(mcp: FastMCP) -> None:
         ctx: Context,
         limit: int = 20,
     ) -> JobTitleEmployersResult:
-        """Return top H-1B sponsoring employers for a job title."""
+        """Use to find employers that sponsor H-1B workers for a job title."""
         return await run_profile_tool(
             query=job_title,
             ctx=ctx,
@@ -74,7 +74,7 @@ def register_job_title_tools(mcp: FastMCP) -> None:
         job_title: JobTitleQuery,
         ctx: Context,
     ) -> JobTitleLCATrendsResult:
-        """Return annual LCA approval, denial, and rate rows for a job title."""
+        """Use to inspect annual LCA approval and denial trends for a job title."""
         return await run_profile_tool(
             query=job_title,
             ctx=ctx,
@@ -91,7 +91,7 @@ def register_job_title_tools(mcp: FastMCP) -> None:
         job_title: JobTitleQuery,
         ctx: Context,
     ) -> JobTitleSalariesResult:
-        """Return annual H-1B salary summary rows for a job title."""
+        """Use to inspect H-1B salary ranges for a job title."""
         return await run_profile_tool(
             query=job_title,
             ctx=ctx,

@@ -92,6 +92,34 @@ async def test_mcp_tools_expose_pydantic_output_schemas(mcp_session: Any) -> Non
 
 
 @pytest.mark.anyio
+async def test_mcp_tools_expose_agent_facing_descriptions(mcp_session: Any) -> None:
+    result = await mcp_session.list_tools()
+    tools = {tool.name: tool for tool in result.tools}
+
+    assert tools["check_h1b_sponsorship"].description == (
+        "Use to check whether an employer has H-1B sponsorship evidence."
+    )
+    assert tools["get_company_role_sponsorship_context"].description == (
+        "Use to gather company-specific and market-wide H-1B context for a role."
+    )
+    assert tools["get_company_profile"].description == (
+        "Use when answering requires the complete source-backed company profile."
+    )
+    assert tools["get_h1b_job_title_profile"].description == (
+        "Use when answering requires the complete source-backed job-title profile."
+    )
+    assert tools["get_h1b_location_profile"].description == (
+        "Use when answering requires the complete source-backed H-1B profile for a city."
+    )
+    assert tools["get_h1b_job_title_employers"].description == (
+        "Use to find employers that sponsor H-1B workers for a job title."
+    )
+    assert tools["get_h1b_location_employers"].description == (
+        "Use to find employers that sponsor H-1B workers in a city."
+    )
+
+
+@pytest.mark.anyio
 async def test_mcp_tools_expose_query_input_guidance(mcp_session: Any) -> None:
     result = await mcp_session.list_tools()
     tools = {tool.name: tool for tool in result.tools}

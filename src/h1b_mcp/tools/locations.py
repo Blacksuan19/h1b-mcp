@@ -24,7 +24,7 @@ def register_location_tools(mcp: FastMCP) -> None:
         location: LocationQuery,
         ctx: Context,
     ) -> LocationSponsorshipResult:
-        """Check whether a city has H-1B sponsorship evidence across employers."""
+        """Use to check whether a city has H-1B activity across employers."""
         return await run_profile_tool(
             query=location,
             ctx=ctx,
@@ -41,7 +41,7 @@ def register_location_tools(mcp: FastMCP) -> None:
         location: LocationQuery,
         ctx: Context,
     ) -> LocationProfile:
-        """Return the full parsed H1BGrader location profile from cache or live fetch."""
+        """Use when answering requires the complete source-backed H-1B profile for a city."""
         return await run_profile_tool(
             query=location,
             ctx=ctx,
@@ -56,7 +56,7 @@ def register_location_tools(mcp: FastMCP) -> None:
         ctx: Context,
         limit: int = 20,
     ) -> LocationEmployersResult:
-        """Return top H-1B sponsoring employers for a city."""
+        """Use to find employers that sponsor H-1B workers in a city."""
         return await run_profile_tool(
             query=location,
             ctx=ctx,
@@ -74,7 +74,7 @@ def register_location_tools(mcp: FastMCP) -> None:
         location: LocationQuery,
         ctx: Context,
     ) -> LocationLCATrendsResult:
-        """Return annual LCA approval, denial, and rate rows for a city."""
+        """Use to inspect annual LCA approval and denial trends in a city."""
         return await run_profile_tool(
             query=location,
             ctx=ctx,
@@ -91,7 +91,7 @@ def register_location_tools(mcp: FastMCP) -> None:
         location: LocationQuery,
         ctx: Context,
     ) -> LocationSalariesResult:
-        """Return annual H-1B salary summary rows for a city."""
+        """Use to inspect H-1B salary ranges in a city."""
         return await run_profile_tool(
             query=location,
             ctx=ctx,
