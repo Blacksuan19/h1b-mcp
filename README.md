@@ -44,9 +44,11 @@ sponsorship signals with structured evidence.
 | `get_company_salaries` | Return annual H-1B salary history for a company. | Fiscal year, max salary, median salary, average salary, and minimum salary. |
 | `get_company_grade` | Return H1BGrader grade details for a company. | Latest grade, confidence, annual grades, and grade insight cards. |
 | `check_h1b_job_title_sponsorship` | Classify market-level H-1B sponsorship evidence for a job title. | Signal, evidence, latest LCA row, approval rate, salary row, and top employers. |
+| `get_h1b_job_title_profile` | Return the full parsed job-title profile. | Cached profile metadata plus parsed LCA, approval-rate, salary, and employer data. |
 | `get_h1b_job_title_employers` | Return top H-1B sponsoring employers for a job title. | Employer names and LCA filing counts. |
 | `get_h1b_job_title_salary` | Return annual H-1B salary history for a job title. | Fiscal year, max salary, median salary, average salary, and minimum salary. |
 | `check_h1b_location_sponsorship` | Classify city-level H-1B sponsorship evidence. | Signal, evidence, latest LCA row, approval rate, salary row, and top employers. |
+| `get_h1b_location_profile` | Return the full parsed city profile. | Cached profile metadata plus parsed LCA, approval-rate, salary, and employer data. |
 | `get_h1b_location_employers` | Return top H-1B sponsoring employers for a city. | Employer names and LCA filing counts. |
 | `get_h1b_location_salary` | Return annual H-1B salary history for a city. | Fiscal year, max salary, median salary, average salary, and minimum salary. |
 
@@ -228,12 +230,14 @@ The browser profile and caches are stored at:
 
 This project exposes company, job-title, and location tools backed by locally
 cached parsed H1BGrader profiles. It does not ship a bundled employer database
-or bulk scrape H1BGrader.
+or bulk scrape H1BGrader. H-1B source data is released periodically, so cached
+profile data is usually useful for repeated analysis rather than minute-by-minute
+freshness.
 
 ## Roadmap
 
-- Company comparison across sponsorship strength, grades, salaries, and titles.
-- Broader search tools across H1BGrader-supported job-title and city pages.
+- More granular profile slices for LCA trends and approval rates.
+- Combined profile lookups for role-specific sponsorship analysis.
 
 ## Troubleshooting
 

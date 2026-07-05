@@ -66,6 +66,8 @@ async def test_mcp_server_lists_registered_tools(mcp_session: Any) -> None:
     assert "check_h1b_sponsorship" in tool_names
     assert "check_h1b_job_title_sponsorship" in tool_names
     assert "check_h1b_location_sponsorship" in tool_names
+    assert "get_h1b_job_title_profile" in tool_names
+    assert "get_h1b_location_profile" in tool_names
     assert "get_h1b_job_title_employers" in tool_names
     assert "get_h1b_location_salary" in tool_names
 
@@ -99,6 +101,20 @@ async def test_mcp_job_title_tool_returns_structured_content(mcp_session: Any) -
 
 
 @pytest.mark.anyio
+async def test_mcp_job_title_profile_tool_returns_full_profile(mcp_session: Any) -> None:
+    result = await mcp_session.call_tool(
+        "get_h1b_job_title_profile",
+        {"job_title": "Machine Learning Engineer"},
+    )
+
+    assert not result.isError
+    assert result.structuredContent is not None
+    assert result.structuredContent["query"] == "Machine Learning Engineer"
+    assert result.structuredContent["matched_name"] == "MACHINE LEARNING ENGINEER"
+    assert result.structuredContent["profile"]["employers"][0]["employer_name"] == "Adobe INC"
+
+
+@pytest.mark.anyio
 async def test_mcp_location_tool_returns_structured_content(mcp_session: Any) -> None:
     result = await mcp_session.call_tool(
         "get_h1b_location_employers",
@@ -110,3 +126,17 @@ async def test_mcp_location_tool_returns_structured_content(mcp_session: Any) ->
     assert result.structuredContent["location_query"] == "Chicago"
     assert result.structuredContent["matched_location"] == "CHICAGO, IL"
     assert len(result.structuredContent["employers"]) == 1
+
+
+@pytest.mark.anyio
+async def test_mcp_location_profile_tool_returns_full_profile(mcp_session: Any) -> None:
+    result = await mcp_session.call_tool(
+        "get_h1b_location_profile",
+        {"location": "Chicago"},
+    )
+
+    assert not result.isError
+    assert result.structuredContent is not None
+    assert result.structuredContent["query"] == "Chicago"
+    assert result.structuredContent["matched_name"] == "CHICAGO, IL"
+    assert result.structuredContent["profile"]["h1b_salaries"][0]["average_salary"] == 190500

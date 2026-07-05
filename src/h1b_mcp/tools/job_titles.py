@@ -32,6 +32,21 @@ def register_job_title_tools(mcp: FastMCP) -> None:
         )
 
     @mcp.tool()
+    async def get_h1b_job_title_profile(
+        job_title: str,
+        ctx: Context,
+    ) -> dict[str, Any]:
+        """Return the full parsed H1BGrader job-title profile from cache or live fetch."""
+        return await run_profile_tool(
+            query=job_title,
+            query_field="job_title_query",
+            ctx=ctx,
+            action_name="job title profile lookup",
+            get_profile=lambda service: service.get_job_title_profile(job_title, logger=ctx),
+            transform=lambda job_title_profile: job_title_profile,
+        )
+
+    @mcp.tool()
     async def get_h1b_job_title_employers(
         job_title: str,
         ctx: Context,

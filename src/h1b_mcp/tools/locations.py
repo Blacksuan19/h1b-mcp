@@ -32,6 +32,21 @@ def register_location_tools(mcp: FastMCP) -> None:
         )
 
     @mcp.tool()
+    async def get_h1b_location_profile(
+        location: str,
+        ctx: Context,
+    ) -> dict[str, Any]:
+        """Return the full parsed H1BGrader location profile from cache or live fetch."""
+        return await run_profile_tool(
+            query=location,
+            query_field="location_query",
+            ctx=ctx,
+            action_name="location profile lookup",
+            get_profile=lambda service: service.get_location_profile(location, logger=ctx),
+            transform=lambda location_profile: location_profile,
+        )
+
+    @mcp.tool()
     async def get_h1b_location_employers(
         location: str,
         ctx: Context,
