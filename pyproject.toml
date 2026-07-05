@@ -1,6 +1,6 @@
 [project]
 name = "h1b-mcp"
-version = "1.0.0"
+version = "1.0.1"
 description = "A live browser-based MCP server for checking H-1B visa sponsorship signals."
 readme = "README.md"
 authors = [{ name = "blacksuan19", email = "py@aolabs.dev" }]
@@ -54,7 +54,7 @@ dev = [
 ]
 
 [tool.bumpver]
-current_version = "1.0.0"
+current_version = "1.0.1"
 version_pattern = "MAJOR.MINOR.PATCH"
 commit_message = "chore(release): bump version {old_version} -> {new_version}"
 commit = true
