@@ -35,395 +35,42 @@ sponsorship signals with structured evidence.
 
 ## Included Tools
 
+All tools return typed structured content. MCP clients can inspect the full
+input and output schemas through `tools/list`.
+
 ### Company Tools
 
-<table>
-  <thead>
-    <tr>
-      <th>Tool</th>
-      <th>Description</th>
-      <th>Output Shape</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td><code>check_h1b_sponsorship</code></td>
-      <td>Classify company-level H-1B sponsorship evidence.</td>
-      <td>
-<details>
-<summary>JSON shape</summary>
-
-<pre lang="json"><code>{
-  "company_query": "string",
-  "matched_company": "string | null",
-  "signal": "string",
-  "url": "string | null",
-  "evidence": ["string"]
-}</code></pre>
-
-</details>
-      </td>
-    </tr>
-    <tr>
-      <td><code>check_company_job_sponsorship</code></td>
-      <td>Check whether a company has sponsored evidence for a specific job title.</td>
-      <td>
-<details>
-<summary>JSON shape</summary>
-
-<pre lang="json"><code>{
-  "company_query": "string",
-  "matched_company": "string | null",
-  "job_title_query": "string",
-  "signal": "string",
-  "url": "string | null",
-  "matches": ["JobTitleMatch"],
-  "company_signal": "string",
-  "evidence": ["string"]
-}</code></pre>
-
-</details>
-      </td>
-    </tr>
-    <tr>
-      <td><code>get_company_role_sponsorship_context</code></td>
-      <td>Return company-specific and market-wide context for a role.</td>
-      <td>
-<details>
-<summary>JSON shape</summary>
-
-<pre lang="json"><code>{
-  "company_query": "string",
-  "matched_company": "string | null",
-  "company_signal": "string",
-  "company_role_signal": "string",
-  "market_signal": "string",
-  "company_role_matches": ["JobTitleMatch"],
-  "market_top_employers": ["EmployerFilingRow"]
-}</code></pre>
-
-</details>
-      </td>
-    </tr>
-    <tr>
-      <td><code>get_company_profile</code></td>
-      <td>Return the full parsed company profile.</td>
-      <td>
-<details>
-<summary>JSON shape</summary>
-
-<pre lang="json"><code>{
-  "query": "string",
-  "matched_name": "string | null",
-  "url": "string",
-  "fetched_at": "datetime",
-  "profile": "H1BGraderProfile"
-}</code></pre>
-
-</details>
-      </td>
-    </tr>
-    <tr>
-      <td><code>get_company_job_titles</code></td>
-      <td>Return sponsored job titles for a company.</td>
-      <td>
-<details>
-<summary>JSON shape</summary>
-
-<pre lang="json"><code>{
-  "company_query": "string",
-  "matched_company": "string | null",
-  "url": "string | null",
-  "job_titles": ["JobTitleRow"]
-}</code></pre>
-
-</details>
-      </td>
-    </tr>
-    <tr>
-      <td><code>get_company_lca_trends</code></td>
-      <td>Return annual company LCA trend rows.</td>
-      <td>
-<details>
-<summary>JSON shape</summary>
-
-<pre lang="json"><code>{
-  "company_query": "string",
-  "matched_company": "string | null",
-  "url": "string | null",
-  "lca_approvals": ["AnnualCountRow"],
-  "lca_approval_rates": ["AnnualRateRow"]
-}</code></pre>
-
-</details>
-      </td>
-    </tr>
-    <tr>
-      <td><code>get_company_uscis_trends</code></td>
-      <td>Return annual company USCIS trend rows.</td>
-      <td>
-<details>
-<summary>JSON shape</summary>
-
-<pre lang="json"><code>{
-  "company_query": "string",
-  "matched_company": "string | null",
-  "url": "string | null",
-  "uscis_approvals": ["AnnualCountRow"],
-  "uscis_approval_rates": ["AnnualRateRow"]
-}</code></pre>
-
-</details>
-      </td>
-    </tr>
-    <tr>
-      <td><code>get_company_salaries</code></td>
-      <td>Return annual H-1B salary history for a company.</td>
-      <td>
-<details>
-<summary>JSON shape</summary>
-
-<pre lang="json"><code>{
-  "company_query": "string",
-  "matched_company": "string | null",
-  "url": "string | null",
-  "salaries": ["AnnualSalaryRow"]
-}</code></pre>
-
-</details>
-      </td>
-    </tr>
-    <tr>
-      <td><code>get_company_grade</code></td>
-      <td>Return H1BGrader grade details for a company.</td>
-      <td>
-<details>
-<summary>JSON shape</summary>
-
-<pre lang="json"><code>{
-  "company_query": "string",
-  "matched_company": "string | null",
-  "url": "string | null",
-  "grade": "GradeProfile | null"
-}</code></pre>
-
-</details>
-      </td>
-    </tr>
-  </tbody>
-</table>
+| Tool | Use |
+| --- | --- |
+| `check_h1b_sponsorship` | Classify company-level H-1B sponsorship evidence. |
+| `check_company_job_sponsorship` | Check whether a company has sponsored evidence for a specific job title. |
+| `get_company_role_sponsorship_context` | Combine company-specific and market-wide H-1B context for a role. |
+| `get_company_profile` | Return the full parsed company profile for broader agent reasoning. |
+| `get_company_job_titles` | Return sponsored job titles for a company. |
+| `get_company_lca_trends` | Return annual company LCA approval and denial trends. |
+| `get_company_uscis_trends` | Return annual company USCIS approval and denial trends. |
+| `get_company_salaries` | Return annual H-1B salary history for a company. |
+| `get_company_grade` | Return H1BGrader grade details for a company. |
 
 ### Job Title Tools
 
-<table>
-  <thead>
-    <tr>
-      <th>Tool</th>
-      <th>Description</th>
-      <th>Output Shape</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td><code>check_h1b_job_title_sponsorship</code></td>
-      <td>Classify market-level H-1B sponsorship evidence for a job title.</td>
-      <td>
-<details>
-<summary>JSON shape</summary>
-
-<pre lang="json"><code>{
-  "job_title_query": "string",
-  "matched_job_title": "string | null",
-  "signal": "string",
-  "url": "string | null",
-  "evidence": ["string"],
-  "latest_lca": "AnnualCountRow | null",
-  "latest_approval_rate": "AnnualRateRow | null",
-  "latest_salary": "AnnualSalaryRow | null",
-  "top_employers": ["EmployerFilingRow"]
-}</code></pre>
-
-</details>
-      </td>
-    </tr>
-    <tr>
-      <td><code>get_h1b_job_title_profile</code></td>
-      <td>Return the full parsed job-title profile.</td>
-      <td>
-<details>
-<summary>JSON shape</summary>
-
-<pre lang="json"><code>{
-  "query": "string",
-  "matched_name": "string | null",
-  "url": "string",
-  "fetched_at": "datetime",
-  "profile": "H1BGraderAggregateProfile"
-}</code></pre>
-
-</details>
-      </td>
-    </tr>
-    <tr>
-      <td><code>get_h1b_job_title_employers</code></td>
-      <td>Return top H-1B sponsoring employers for a job title.</td>
-      <td>
-<details>
-<summary>JSON shape</summary>
-
-<pre lang="json"><code>{
-  "job_title_query": "string",
-  "matched_job_title": "string | null",
-  "url": "string | null",
-  "employers": ["EmployerFilingRow"]
-}</code></pre>
-
-</details>
-      </td>
-    </tr>
-    <tr>
-      <td><code>get_h1b_job_title_lca_trends</code></td>
-      <td>Return annual job-title LCA trend rows.</td>
-      <td>
-<details>
-<summary>JSON shape</summary>
-
-<pre lang="json"><code>{
-  "job_title_query": "string",
-  "matched_job_title": "string | null",
-  "url": "string | null",
-  "lca_approvals": ["AnnualCountRow"],
-  "lca_approval_rates": ["AnnualRateRow"]
-}</code></pre>
-
-</details>
-      </td>
-    </tr>
-    <tr>
-      <td><code>get_h1b_job_title_salary</code></td>
-      <td>Return annual H-1B salary history for a job title.</td>
-      <td>
-<details>
-<summary>JSON shape</summary>
-
-<pre lang="json"><code>{
-  "job_title_query": "string",
-  "matched_job_title": "string | null",
-  "url": "string | null",
-  "salaries": ["AnnualSalaryRow"]
-}</code></pre>
-
-</details>
-      </td>
-    </tr>
-  </tbody>
-</table>
+| Tool | Use |
+| --- | --- |
+| `check_h1b_job_title_sponsorship` | Classify market-level H-1B sponsorship evidence for a job title. |
+| `get_h1b_job_title_profile` | Return the full parsed job-title profile for broader agent reasoning. |
+| `get_h1b_job_title_employers` | Return top H-1B sponsoring employers for a job title. |
+| `get_h1b_job_title_lca_trends` | Return annual job-title LCA approval and denial trends. |
+| `get_h1b_job_title_salary` | Return annual H-1B salary history for a job title. |
 
 ### Location Tools
 
-<table>
-  <thead>
-    <tr>
-      <th>Tool</th>
-      <th>Description</th>
-      <th>Output Shape</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td><code>check_h1b_location_sponsorship</code></td>
-      <td>Classify city-level H-1B sponsorship evidence.</td>
-      <td>
-<details>
-<summary>JSON shape</summary>
-
-<pre lang="json"><code>{
-  "location_query": "string",
-  "matched_location": "string | null",
-  "signal": "string",
-  "url": "string | null",
-  "evidence": ["string"],
-  "latest_lca": "AnnualCountRow | null",
-  "latest_approval_rate": "AnnualRateRow | null",
-  "latest_salary": "AnnualSalaryRow | null",
-  "top_employers": ["EmployerFilingRow"]
-}</code></pre>
-
-</details>
-      </td>
-    </tr>
-    <tr>
-      <td><code>get_h1b_location_profile</code></td>
-      <td>Return the full parsed city profile.</td>
-      <td>
-<details>
-<summary>JSON shape</summary>
-
-<pre lang="json"><code>{
-  "query": "string",
-  "matched_name": "string | null",
-  "url": "string",
-  "fetched_at": "datetime",
-  "profile": "H1BGraderAggregateProfile"
-}</code></pre>
-
-</details>
-      </td>
-    </tr>
-    <tr>
-      <td><code>get_h1b_location_employers</code></td>
-      <td>Return top H-1B sponsoring employers for a city.</td>
-      <td>
-<details>
-<summary>JSON shape</summary>
-
-<pre lang="json"><code>{
-  "location_query": "string",
-  "matched_location": "string | null",
-  "url": "string | null",
-  "employers": ["EmployerFilingRow"]
-}</code></pre>
-
-</details>
-      </td>
-    </tr>
-    <tr>
-      <td><code>get_h1b_location_lca_trends</code></td>
-      <td>Return annual city LCA trend rows.</td>
-      <td>
-<details>
-<summary>JSON shape</summary>
-
-<pre lang="json"><code>{
-  "location_query": "string",
-  "matched_location": "string | null",
-  "url": "string | null",
-  "lca_approvals": ["AnnualCountRow"],
-  "lca_approval_rates": ["AnnualRateRow"]
-}</code></pre>
-
-</details>
-      </td>
-    </tr>
-    <tr>
-      <td><code>get_h1b_location_salary</code></td>
-      <td>Return annual H-1B salary history for a city.</td>
-      <td>
-<details>
-<summary>JSON shape</summary>
-
-<pre lang="json"><code>{
-  "location_query": "string",
-  "matched_location": "string | null",
-  "url": "string | null",
-  "salaries": ["AnnualSalaryRow"]
-}</code></pre>
-
-</details>
-      </td>
-    </tr>
-  </tbody>
-</table>
+| Tool | Use |
+| --- | --- |
+| `check_h1b_location_sponsorship` | Classify city-level H-1B sponsorship evidence. |
+| `get_h1b_location_profile` | Return the full parsed city profile for broader agent reasoning. |
+| `get_h1b_location_employers` | Return top H-1B sponsoring employers for a city. |
+| `get_h1b_location_lca_trends` | Return annual city LCA approval and denial trends. |
+| `get_h1b_location_salary` | Return annual H-1B salary history for a city. |
 
 ## Quick Start
 
