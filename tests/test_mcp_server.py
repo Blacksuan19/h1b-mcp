@@ -92,6 +92,21 @@ async def test_mcp_tools_expose_pydantic_output_schemas(mcp_session: Any) -> Non
 
 
 @pytest.mark.anyio
+async def test_mcp_tools_expose_query_input_guidance(mcp_session: Any) -> None:
+    result = await mcp_session.list_tools()
+    tools = {tool.name: tool for tool in result.tools}
+
+    location_schema = tools["get_h1b_location_profile"].inputSchema["properties"]["location"]
+    job_title_schema = tools["get_h1b_job_title_profile"].inputSchema["properties"]["job_title"]
+    company_schema = tools["get_company_profile"].inputSchema["properties"]["company_name"]
+
+    assert "City name only" in location_schema["description"]
+    assert "Chicago" in location_schema["examples"]
+    assert "Machine Learning Engineer" in job_title_schema["examples"]
+    assert "Databricks" in company_schema["examples"]
+
+
+@pytest.mark.anyio
 async def test_mcp_company_tool_returns_structured_content(mcp_session: Any) -> None:
     result = await mcp_session.call_tool(
         "check_h1b_sponsorship",

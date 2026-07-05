@@ -20,7 +20,7 @@ from h1b_mcp.responses.company import (
     build_company_sponsorship_result,
 )
 from h1b_mcp.service import H1BGraderService
-from h1b_mcp.tools.common import run_profile_tool, run_tool
+from h1b_mcp.tools.common import CompanyQuery, JobTitleQuery, run_profile_tool, run_tool
 
 
 def register_company_tools(mcp: FastMCP) -> None:
@@ -28,7 +28,7 @@ def register_company_tools(mcp: FastMCP) -> None:
 
     @mcp.tool()
     async def check_h1b_sponsorship(
-        company_name: str,
+        company_name: CompanyQuery,
         ctx: Context,
     ) -> CompanySponsorshipResult:
         """Check whether a company has H-1B sponsorship evidence."""
@@ -45,8 +45,8 @@ def register_company_tools(mcp: FastMCP) -> None:
 
     @mcp.tool()
     async def check_company_job_sponsorship(
-        company_name: str,
-        job_title: str,
+        company_name: CompanyQuery,
+        job_title: JobTitleQuery,
         ctx: Context,
     ) -> CompanyJobSponsorshipResult:
         """Check whether a company has sponsored H-1B evidence for a job title."""
@@ -63,7 +63,7 @@ def register_company_tools(mcp: FastMCP) -> None:
         )
 
     @mcp.tool()
-    async def get_company_profile(company_name: str, ctx: Context) -> CompanyProfile:
+    async def get_company_profile(company_name: CompanyQuery, ctx: Context) -> CompanyProfile:
         """Return the full parsed H1BGrader company profile from cache or live fetch."""
         return await run_profile_tool(
             query=company_name,
@@ -75,8 +75,8 @@ def register_company_tools(mcp: FastMCP) -> None:
 
     @mcp.tool()
     async def get_company_role_sponsorship_context(
-        company_name: str,
-        job_title: str,
+        company_name: CompanyQuery,
+        job_title: JobTitleQuery,
         ctx: Context,
     ) -> CompanyRoleSponsorshipContextResult:
         """Return company-specific and market-wide H-1B context for a role."""
@@ -100,7 +100,7 @@ def register_company_tools(mcp: FastMCP) -> None:
 
     @mcp.tool()
     async def get_company_job_titles(
-        company_name: str,
+        company_name: CompanyQuery,
         ctx: Context,
     ) -> CompanyJobTitlesResult:
         """Return sponsored job titles and salary ranges for a company."""
@@ -117,7 +117,7 @@ def register_company_tools(mcp: FastMCP) -> None:
 
     @mcp.tool()
     async def get_company_lca_trends(
-        company_name: str,
+        company_name: CompanyQuery,
         ctx: Context,
     ) -> CompanyLCATrendsResult:
         """Return annual LCA approval, denial, and rate rows for a company."""
@@ -133,7 +133,10 @@ def register_company_tools(mcp: FastMCP) -> None:
         )
 
     @mcp.tool()
-    async def get_company_salaries(company_name: str, ctx: Context) -> CompanySalariesResult:
+    async def get_company_salaries(
+        company_name: CompanyQuery,
+        ctx: Context,
+    ) -> CompanySalariesResult:
         """Return annual H-1B salary summary rows for a company."""
         return await run_profile_tool(
             query=company_name,
@@ -147,7 +150,7 @@ def register_company_tools(mcp: FastMCP) -> None:
         )
 
     @mcp.tool()
-    async def get_company_grade(company_name: str, ctx: Context) -> CompanyGradeResult:
+    async def get_company_grade(company_name: CompanyQuery, ctx: Context) -> CompanyGradeResult:
         """Return H1BGrader grade, confidence, and insight data for a company."""
         return await run_profile_tool(
             query=company_name,

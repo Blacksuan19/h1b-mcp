@@ -1,8 +1,8 @@
 from collections.abc import Awaitable, Callable
-from typing import TypeVar
+from typing import Annotated, TypeVar
 
 from mcp.server.fastmcp import Context
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from h1b_mcp.models import H1BGraderBlockedError
 from h1b_mcp.service import H1BGraderService
@@ -10,6 +10,31 @@ from h1b_mcp.settings import settings
 
 T = TypeVar("T", bound=BaseModel)
 TProfile = TypeVar("TProfile", bound=BaseModel)
+
+CompanyQuery = Annotated[
+    str,
+    Field(
+        description="Company or employer name. Example: Databricks.",
+        examples=["Databricks", "Cloudflare", "Microsoft"],
+    ),
+]
+JobTitleQuery = Annotated[
+    str,
+    Field(
+        description="Job title to search. Use the role title as written or a close variant.",
+        examples=["Machine Learning Engineer", "Senior Software Engineer", "Data Scientist"],
+    ),
+]
+LocationQuery = Annotated[
+    str,
+    Field(
+        description=(
+            "City name only. Do not include state, province, or country. "
+            "Use Chicago, not Chicago, IL."
+        ),
+        examples=["Chicago", "San Francisco", "New York"],
+    ),
+]
 
 
 async def run_profile_tool(

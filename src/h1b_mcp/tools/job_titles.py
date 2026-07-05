@@ -13,7 +13,7 @@ from h1b_mcp.responses.aggregate import (
     build_job_title_salaries_result,
     build_job_title_sponsorship_result,
 )
-from h1b_mcp.tools.common import run_profile_tool
+from h1b_mcp.tools.common import JobTitleQuery, run_profile_tool
 
 
 def register_job_title_tools(mcp: FastMCP) -> None:
@@ -21,7 +21,7 @@ def register_job_title_tools(mcp: FastMCP) -> None:
 
     @mcp.tool()
     async def check_h1b_job_title_sponsorship(
-        job_title: str,
+        job_title: JobTitleQuery,
         ctx: Context,
     ) -> JobTitleSponsorshipResult:
         """Check whether a job title has H-1B sponsorship evidence across employers."""
@@ -38,7 +38,7 @@ def register_job_title_tools(mcp: FastMCP) -> None:
 
     @mcp.tool()
     async def get_h1b_job_title_profile(
-        job_title: str,
+        job_title: JobTitleQuery,
         ctx: Context,
     ) -> JobTitleProfile:
         """Return the full parsed H1BGrader job-title profile from cache or live fetch."""
@@ -52,7 +52,7 @@ def register_job_title_tools(mcp: FastMCP) -> None:
 
     @mcp.tool()
     async def get_h1b_job_title_employers(
-        job_title: str,
+        job_title: JobTitleQuery,
         ctx: Context,
         limit: int = 20,
     ) -> JobTitleEmployersResult:
@@ -71,7 +71,7 @@ def register_job_title_tools(mcp: FastMCP) -> None:
 
     @mcp.tool()
     async def get_h1b_job_title_lca_trends(
-        job_title: str,
+        job_title: JobTitleQuery,
         ctx: Context,
     ) -> JobTitleLCATrendsResult:
         """Return annual LCA approval, denial, and rate rows for a job title."""
@@ -88,7 +88,7 @@ def register_job_title_tools(mcp: FastMCP) -> None:
 
     @mcp.tool()
     async def get_h1b_job_title_salary(
-        job_title: str,
+        job_title: JobTitleQuery,
         ctx: Context,
     ) -> JobTitleSalariesResult:
         """Return annual H-1B salary summary rows for a job title."""

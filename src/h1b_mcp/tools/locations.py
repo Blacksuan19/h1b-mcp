@@ -13,7 +13,7 @@ from h1b_mcp.responses.aggregate import (
     build_location_salaries_result,
     build_location_sponsorship_result,
 )
-from h1b_mcp.tools.common import run_profile_tool
+from h1b_mcp.tools.common import LocationQuery, run_profile_tool
 
 
 def register_location_tools(mcp: FastMCP) -> None:
@@ -21,7 +21,7 @@ def register_location_tools(mcp: FastMCP) -> None:
 
     @mcp.tool()
     async def check_h1b_location_sponsorship(
-        location: str,
+        location: LocationQuery,
         ctx: Context,
     ) -> LocationSponsorshipResult:
         """Check whether a city has H-1B sponsorship evidence across employers."""
@@ -38,7 +38,7 @@ def register_location_tools(mcp: FastMCP) -> None:
 
     @mcp.tool()
     async def get_h1b_location_profile(
-        location: str,
+        location: LocationQuery,
         ctx: Context,
     ) -> LocationProfile:
         """Return the full parsed H1BGrader location profile from cache or live fetch."""
@@ -52,7 +52,7 @@ def register_location_tools(mcp: FastMCP) -> None:
 
     @mcp.tool()
     async def get_h1b_location_employers(
-        location: str,
+        location: LocationQuery,
         ctx: Context,
         limit: int = 20,
     ) -> LocationEmployersResult:
@@ -71,7 +71,7 @@ def register_location_tools(mcp: FastMCP) -> None:
 
     @mcp.tool()
     async def get_h1b_location_lca_trends(
-        location: str,
+        location: LocationQuery,
         ctx: Context,
     ) -> LocationLCATrendsResult:
         """Return annual LCA approval, denial, and rate rows for a city."""
@@ -88,7 +88,7 @@ def register_location_tools(mcp: FastMCP) -> None:
 
     @mcp.tool()
     async def get_h1b_location_salary(
-        location: str,
+        location: LocationQuery,
         ctx: Context,
     ) -> LocationSalariesResult:
         """Return annual H-1B salary summary rows for a city."""
