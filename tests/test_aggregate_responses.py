@@ -1,8 +1,10 @@
 from h1b_mcp.responses.aggregate import (
     build_job_title_employers_result,
+    build_job_title_lca_trends_result,
     build_job_title_salaries_result,
     build_job_title_sponsorship_result,
     build_location_employers_result,
+    build_location_lca_trends_result,
     build_location_salaries_result,
     build_location_sponsorship_result,
 )
@@ -45,6 +47,20 @@ def test_build_job_title_employers_and_salaries_results() -> None:
     assert salaries.salaries[0].fiscal_year == 2026
 
 
+def test_build_job_title_lca_trends_result_returns_trend_rows() -> None:
+    profile = machine_learning_engineer_profile()
+
+    result = build_job_title_lca_trends_result(
+        job_title_query="Machine Learning Engineer",
+        job_title_profile=profile,
+    )
+
+    assert result.job_title_query == "Machine Learning Engineer"
+    assert result.matched_job_title == "MACHINE LEARNING ENGINEER"
+    assert result.lca_approvals[0].counts["certified"] == 290
+    assert result.lca_approval_rates[0].denial_rate == 0.32
+
+
 def test_build_location_sponsorship_result_summarizes_aggregate_profile() -> None:
     profile = chicago_location_profile()
 
@@ -77,3 +93,17 @@ def test_build_location_employers_and_salaries_results() -> None:
     assert len(employers.employers) == 1
     assert employers.employers[0].employer_name == "Adobe INC"
     assert salaries.salaries[0].average_salary == 190500
+
+
+def test_build_location_lca_trends_result_returns_trend_rows() -> None:
+    profile = chicago_location_profile()
+
+    result = build_location_lca_trends_result(
+        location_query="Chicago",
+        location_profile=profile,
+    )
+
+    assert result.location_query == "Chicago"
+    assert result.matched_location == "CHICAGO, IL"
+    assert result.lca_approvals[0].counts["denied"] == 1
+    assert result.lca_approval_rates[0].approval_rate == 99.68

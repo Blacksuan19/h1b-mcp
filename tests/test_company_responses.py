@@ -3,10 +3,12 @@ from h1b_mcp.responses.company import (
     build_company_grade_result,
     build_company_job_sponsorship_result,
     build_company_job_titles_result,
+    build_company_lca_trends_result,
+    build_company_role_sponsorship_context_result,
     build_company_salaries_result,
     build_company_sponsorship_result,
 )
-from tests.fixtures import databricks_company_profile
+from tests.fixtures import databricks_company_profile, machine_learning_engineer_profile
 
 
 def test_build_company_sponsorship_result_is_compact() -> None:
@@ -82,6 +84,41 @@ def test_build_company_profile_slices() -> None:
     assert salaries.salaries[0].fiscal_year == 2026
     assert grade.grade is not None
     assert grade.grade.latest_grade == "A"
+
+
+def test_build_company_lca_trends_result_returns_trend_rows() -> None:
+    company_profile = databricks_company_profile()
+
+    result = build_company_lca_trends_result(
+        company_query="Databricks",
+        company_profile=company_profile,
+    )
+
+    assert result.company_query == "Databricks"
+    assert result.matched_company == "DATABRICKS INC"
+    assert result.lca_approvals[0].fiscal_year == 2026
+    assert result.lca_approval_rates[0].approval_rate == 100.0
+
+
+def test_build_company_role_sponsorship_context_combines_company_and_market_data() -> None:
+    company_profile = databricks_company_profile()
+    job_title_profile = machine_learning_engineer_profile()
+
+    result = build_company_role_sponsorship_context_result(
+        company_query="Databricks",
+        job_title_query="Machine Learning Engineer",
+        company_profile=company_profile,
+        job_title_profile=job_title_profile,
+    )
+
+    assert result.company_query == "Databricks"
+    assert result.matched_company == "DATABRICKS INC"
+    assert result.job_title_query == "Machine Learning Engineer"
+    assert result.matched_job_title == "MACHINE LEARNING ENGINEER"
+    assert result.company_signal == "Strong signal"
+    assert result.company_role_signal in {"Close title evidence", "Adjacent evidence"}
+    assert result.market_signal == "Strong signal"
+    assert result.market_top_employers[0].employer_name == "Adobe INC"
 
 
 def test_match_job_titles_orders_exact_before_adjacent() -> None:
