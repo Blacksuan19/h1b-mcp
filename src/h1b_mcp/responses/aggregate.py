@@ -5,10 +5,12 @@ from h1b_mcp.models import (
     AnnualRateRow,
     AnnualSalaryRow,
     JobTitleEmployersResult,
+    JobTitleLCATrendsResult,
     JobTitleProfile,
     JobTitleSalariesResult,
     JobTitleSponsorshipResult,
     LocationEmployersResult,
+    LocationLCATrendsResult,
     LocationProfile,
     LocationSalariesResult,
     LocationSponsorshipResult,
@@ -71,6 +73,20 @@ def build_job_title_salaries_result(
     )
 
 
+def build_job_title_lca_trends_result(
+    *,
+    job_title_query: str,
+    job_title_profile: JobTitleProfile,
+) -> JobTitleLCATrendsResult:
+    return JobTitleLCATrendsResult(
+        job_title_query=job_title_query,
+        matched_job_title=job_title_profile.matched_name,
+        url=job_title_profile.url,
+        lca_approvals=job_title_profile.profile.lca_approvals,
+        lca_approval_rates=job_title_profile.profile.lca_approval_rates,
+    )
+
+
 def build_location_sponsorship_result(
     *,
     location_query: str,
@@ -121,6 +137,20 @@ def build_location_salaries_result(
         matched_location=location_profile.matched_name,
         url=location_profile.url,
         salaries=location_profile.profile.h1b_salaries,
+    )
+
+
+def build_location_lca_trends_result(
+    *,
+    location_query: str,
+    location_profile: LocationProfile,
+) -> LocationLCATrendsResult:
+    return LocationLCATrendsResult(
+        location_query=location_query,
+        matched_location=location_profile.matched_name,
+        url=location_profile.url,
+        lca_approvals=location_profile.profile.lca_approvals,
+        lca_approval_rates=location_profile.profile.lca_approval_rates,
     )
 
 

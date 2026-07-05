@@ -4,6 +4,7 @@ from mcp.server.fastmcp import Context, FastMCP
 
 from h1b_mcp.responses.aggregate import (
     build_location_employers_result,
+    build_location_lca_trends_result,
     build_location_salaries_result,
     build_location_sponsorship_result,
 )
@@ -63,6 +64,24 @@ def register_location_tools(mcp: FastMCP) -> None:
                 location_query=location,
                 location_profile=location_profile,
                 limit=limit,
+            ),
+        )
+
+    @mcp.tool()
+    async def get_h1b_location_lca_trends(
+        location: str,
+        ctx: Context,
+    ) -> dict[str, Any]:
+        """Return annual LCA approval, denial, and rate rows for a city."""
+        return await run_profile_tool(
+            query=location,
+            query_field="location_query",
+            ctx=ctx,
+            action_name="location LCA trends lookup",
+            get_profile=lambda service: service.get_location_profile(location, logger=ctx),
+            transform=lambda location_profile: build_location_lca_trends_result(
+                location_query=location,
+                location_profile=location_profile,
             ),
         )
 

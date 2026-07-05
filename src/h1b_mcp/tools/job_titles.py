@@ -4,6 +4,7 @@ from mcp.server.fastmcp import Context, FastMCP
 
 from h1b_mcp.responses.aggregate import (
     build_job_title_employers_result,
+    build_job_title_lca_trends_result,
     build_job_title_salaries_result,
     build_job_title_sponsorship_result,
 )
@@ -63,6 +64,24 @@ def register_job_title_tools(mcp: FastMCP) -> None:
                 job_title_query=job_title,
                 job_title_profile=job_title_profile,
                 limit=limit,
+            ),
+        )
+
+    @mcp.tool()
+    async def get_h1b_job_title_lca_trends(
+        job_title: str,
+        ctx: Context,
+    ) -> dict[str, Any]:
+        """Return annual LCA approval, denial, and rate rows for a job title."""
+        return await run_profile_tool(
+            query=job_title,
+            query_field="job_title_query",
+            ctx=ctx,
+            action_name="job title LCA trends lookup",
+            get_profile=lambda service: service.get_job_title_profile(job_title, logger=ctx),
+            transform=lambda job_title_profile: build_job_title_lca_trends_result(
+                job_title_query=job_title,
+                job_title_profile=job_title_profile,
             ),
         )
 

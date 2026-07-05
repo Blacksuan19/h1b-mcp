@@ -3,14 +3,25 @@ from h1b_mcp.models import (
     CompanyGradeResult,
     CompanyJobSponsorshipResult,
     CompanyJobTitlesResult,
+    CompanyLCATrendsResult,
     CompanyProfile,
+    CompanyRoleSponsorshipContextResult,
     CompanySalariesResult,
     CompanySponsorshipResult,
     JobSponsorshipSignal,
     JobTitleMatch,
+    JobTitleProfile,
     SponsorSignal,
 )
 from h1b_mcp.parsers.summary import latest_nonzero_count_row
+from h1b_mcp.responses.aggregate import (
+    aggregate_sponsorship_evidence,
+    bounded_limit,
+    classify_aggregate_sponsorship,
+    latest_lca_row,
+    latest_rate_row,
+    latest_salary_row,
+)
 
 
 def build_company_sponsorship_result(
@@ -82,6 +93,20 @@ def build_company_salaries_result(
     )
 
 
+def build_company_lca_trends_result(
+    *,
+    company_query: str,
+    company_profile: CompanyProfile,
+) -> CompanyLCATrendsResult:
+    return CompanyLCATrendsResult(
+        company_query=company_query,
+        matched_company=company_profile.matched_name,
+        url=company_profile.url,
+        lca_approvals=company_profile.profile.lca_approvals,
+        lca_approval_rates=company_profile.profile.lca_approval_rates,
+    )
+
+
 def build_company_grade_result(
     *,
     company_query: str,
@@ -92,6 +117,45 @@ def build_company_grade_result(
         matched_company=company_profile.matched_name,
         url=company_profile.url,
         grade=company_profile.profile.grade,
+    )
+
+
+def build_company_role_sponsorship_context_result(
+    *,
+    company_query: str,
+    job_title_query: str,
+    company_profile: CompanyProfile,
+    job_title_profile: JobTitleProfile,
+    employer_limit: int = 10,
+) -> CompanyRoleSponsorshipContextResult:
+    matches = match_job_titles(job_title_query, company_profile.profile.job_titles)
+    company_signal = classify_company_sponsorship(company_profile)
+    company_role_signal = classify_job_sponsorship(matches, company_signal)
+    return CompanyRoleSponsorshipContextResult(
+        company_query=company_query,
+        matched_company=company_profile.matched_name,
+        company_url=company_profile.url,
+        company_signal=company_signal,
+        company_evidence=company_sponsorship_evidence(company_profile),
+        job_title_query=job_title_query,
+        matched_job_title=job_title_profile.matched_name,
+        job_title_url=job_title_profile.url,
+        company_role_signal=company_role_signal,
+        company_role_matches=matches,
+        company_role_evidence=company_job_sponsorship_evidence(
+            job_title=job_title_query,
+            matches=matches,
+            company_signal=company_signal,
+        ),
+        market_signal=classify_aggregate_sponsorship(job_title_profile),
+        market_evidence=aggregate_sponsorship_evidence(
+            profile=job_title_profile,
+            label="job title",
+        ),
+        market_latest_lca=latest_lca_row(job_title_profile),
+        market_latest_approval_rate=latest_rate_row(job_title_profile),
+        market_latest_salary=latest_salary_row(job_title_profile),
+        market_top_employers=job_title_profile.profile.employers[:bounded_limit(employer_limit)],
     )
 
 

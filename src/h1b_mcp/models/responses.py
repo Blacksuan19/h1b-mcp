@@ -46,6 +46,12 @@ class AggregateSponsorshipResultBase(SponsorshipResultBase):
     top_employers: list[EmployerFilingRow] = Field(default_factory=list)
 
 
+class LCATrendsResultBase(BaseModel):
+    url: str | None = None
+    lca_approvals: list[AnnualCountRow] = Field(default_factory=list)
+    lca_approval_rates: list[AnnualRateRow] = Field(default_factory=list)
+
+
 class H1BLookupResult(SponsorshipResultBase):
     company_query: str
     matched_company: str | None = None
@@ -90,11 +96,36 @@ class CompanySalariesResult(SalariesResultBase):
     matched_company: str | None = None
 
 
+class CompanyLCATrendsResult(LCATrendsResultBase):
+    company_query: str
+    matched_company: str | None = None
+
+
 class CompanyGradeResult(BaseModel):
     company_query: str
     matched_company: str | None = None
     url: str | None = None
     grade: GradeProfile | None = None
+
+
+class CompanyRoleSponsorshipContextResult(BaseModel):
+    company_query: str
+    matched_company: str | None = None
+    company_url: str | None = None
+    company_signal: SponsorSignal
+    company_evidence: list[str] = Field(default_factory=list)
+    job_title_query: str
+    matched_job_title: str | None = None
+    job_title_url: str | None = None
+    company_role_signal: JobSponsorshipSignal
+    company_role_matches: list[JobTitleMatch] = Field(default_factory=list)
+    company_role_evidence: list[str] = Field(default_factory=list)
+    market_signal: SponsorSignal
+    market_evidence: list[str] = Field(default_factory=list)
+    market_latest_lca: AnnualCountRow | None = None
+    market_latest_approval_rate: AnnualRateRow | None = None
+    market_latest_salary: AnnualSalaryRow | None = None
+    market_top_employers: list[EmployerFilingRow] = Field(default_factory=list)
 
 
 class JobTitleSponsorshipResult(AggregateSponsorshipResultBase):
@@ -112,6 +143,11 @@ class JobTitleSalariesResult(SalariesResultBase):
     matched_job_title: str | None = None
 
 
+class JobTitleLCATrendsResult(LCATrendsResultBase):
+    job_title_query: str
+    matched_job_title: str | None = None
+
+
 class LocationSponsorshipResult(AggregateSponsorshipResultBase):
     location_query: str
     matched_location: str | None = None
@@ -123,5 +159,10 @@ class LocationEmployersResult(AggregateEmployersResultBase):
 
 
 class LocationSalariesResult(SalariesResultBase):
+    location_query: str
+    matched_location: str | None = None
+
+
+class LocationLCATrendsResult(LCATrendsResultBase):
     location_query: str
     matched_location: str | None = None
