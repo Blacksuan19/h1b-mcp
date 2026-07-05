@@ -77,6 +77,21 @@ async def test_mcp_server_lists_registered_tools(mcp_session: Any) -> None:
 
 
 @pytest.mark.anyio
+async def test_mcp_tools_expose_pydantic_output_schemas(mcp_session: Any) -> None:
+    result = await mcp_session.list_tools()
+    tools = {tool.name: tool for tool in result.tools}
+
+    assert tools["check_h1b_sponsorship"].outputSchema["title"] == "CompanySponsorshipResult"
+    assert tools["get_company_profile"].outputSchema["title"] == "CompanyProfile"
+    assert (
+        tools["get_company_role_sponsorship_context"].outputSchema["title"]
+        == "CompanyRoleSponsorshipContextResult"
+    )
+    assert tools["get_h1b_job_title_profile"].outputSchema["title"] == "JobTitleProfile"
+    assert tools["get_h1b_location_profile"].outputSchema["title"] == "LocationProfile"
+
+
+@pytest.mark.anyio
 async def test_mcp_company_tool_returns_structured_content(mcp_session: Any) -> None:
     result = await mcp_session.call_tool(
         "check_h1b_sponsorship",

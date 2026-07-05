@@ -1,7 +1,12 @@
-from typing import Any
-
 from mcp.server.fastmcp import Context, FastMCP
 
+from h1b_mcp.models import (
+    LocationEmployersResult,
+    LocationLCATrendsResult,
+    LocationProfile,
+    LocationSalariesResult,
+    LocationSponsorshipResult,
+)
 from h1b_mcp.responses.aggregate import (
     build_location_employers_result,
     build_location_lca_trends_result,
@@ -18,11 +23,10 @@ def register_location_tools(mcp: FastMCP) -> None:
     async def check_h1b_location_sponsorship(
         location: str,
         ctx: Context,
-    ) -> dict[str, Any]:
+    ) -> LocationSponsorshipResult:
         """Check whether a city has H-1B sponsorship evidence across employers."""
         return await run_profile_tool(
             query=location,
-            query_field="location_query",
             ctx=ctx,
             action_name="location sponsorship check",
             get_profile=lambda service: service.get_location_profile(location, logger=ctx),
@@ -36,11 +40,10 @@ def register_location_tools(mcp: FastMCP) -> None:
     async def get_h1b_location_profile(
         location: str,
         ctx: Context,
-    ) -> dict[str, Any]:
+    ) -> LocationProfile:
         """Return the full parsed H1BGrader location profile from cache or live fetch."""
         return await run_profile_tool(
             query=location,
-            query_field="location_query",
             ctx=ctx,
             action_name="location profile lookup",
             get_profile=lambda service: service.get_location_profile(location, logger=ctx),
@@ -52,11 +55,10 @@ def register_location_tools(mcp: FastMCP) -> None:
         location: str,
         ctx: Context,
         limit: int = 20,
-    ) -> dict[str, Any]:
+    ) -> LocationEmployersResult:
         """Return top H-1B sponsoring employers for a city."""
         return await run_profile_tool(
             query=location,
-            query_field="location_query",
             ctx=ctx,
             action_name="location employers lookup",
             get_profile=lambda service: service.get_location_profile(location, logger=ctx),
@@ -71,11 +73,10 @@ def register_location_tools(mcp: FastMCP) -> None:
     async def get_h1b_location_lca_trends(
         location: str,
         ctx: Context,
-    ) -> dict[str, Any]:
+    ) -> LocationLCATrendsResult:
         """Return annual LCA approval, denial, and rate rows for a city."""
         return await run_profile_tool(
             query=location,
-            query_field="location_query",
             ctx=ctx,
             action_name="location LCA trends lookup",
             get_profile=lambda service: service.get_location_profile(location, logger=ctx),
@@ -89,11 +90,10 @@ def register_location_tools(mcp: FastMCP) -> None:
     async def get_h1b_location_salary(
         location: str,
         ctx: Context,
-    ) -> dict[str, Any]:
+    ) -> LocationSalariesResult:
         """Return annual H-1B salary summary rows for a city."""
         return await run_profile_tool(
             query=location,
-            query_field="location_query",
             ctx=ctx,
             action_name="location salary lookup",
             get_profile=lambda service: service.get_location_profile(location, logger=ctx),

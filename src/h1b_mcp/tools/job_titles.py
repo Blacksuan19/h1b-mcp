@@ -1,7 +1,12 @@
-from typing import Any
-
 from mcp.server.fastmcp import Context, FastMCP
 
+from h1b_mcp.models import (
+    JobTitleEmployersResult,
+    JobTitleLCATrendsResult,
+    JobTitleProfile,
+    JobTitleSalariesResult,
+    JobTitleSponsorshipResult,
+)
 from h1b_mcp.responses.aggregate import (
     build_job_title_employers_result,
     build_job_title_lca_trends_result,
@@ -18,11 +23,10 @@ def register_job_title_tools(mcp: FastMCP) -> None:
     async def check_h1b_job_title_sponsorship(
         job_title: str,
         ctx: Context,
-    ) -> dict[str, Any]:
+    ) -> JobTitleSponsorshipResult:
         """Check whether a job title has H-1B sponsorship evidence across employers."""
         return await run_profile_tool(
             query=job_title,
-            query_field="job_title_query",
             ctx=ctx,
             action_name="job title sponsorship check",
             get_profile=lambda service: service.get_job_title_profile(job_title, logger=ctx),
@@ -36,11 +40,10 @@ def register_job_title_tools(mcp: FastMCP) -> None:
     async def get_h1b_job_title_profile(
         job_title: str,
         ctx: Context,
-    ) -> dict[str, Any]:
+    ) -> JobTitleProfile:
         """Return the full parsed H1BGrader job-title profile from cache or live fetch."""
         return await run_profile_tool(
             query=job_title,
-            query_field="job_title_query",
             ctx=ctx,
             action_name="job title profile lookup",
             get_profile=lambda service: service.get_job_title_profile(job_title, logger=ctx),
@@ -52,11 +55,10 @@ def register_job_title_tools(mcp: FastMCP) -> None:
         job_title: str,
         ctx: Context,
         limit: int = 20,
-    ) -> dict[str, Any]:
+    ) -> JobTitleEmployersResult:
         """Return top H-1B sponsoring employers for a job title."""
         return await run_profile_tool(
             query=job_title,
-            query_field="job_title_query",
             ctx=ctx,
             action_name="job title employers lookup",
             get_profile=lambda service: service.get_job_title_profile(job_title, logger=ctx),
@@ -71,11 +73,10 @@ def register_job_title_tools(mcp: FastMCP) -> None:
     async def get_h1b_job_title_lca_trends(
         job_title: str,
         ctx: Context,
-    ) -> dict[str, Any]:
+    ) -> JobTitleLCATrendsResult:
         """Return annual LCA approval, denial, and rate rows for a job title."""
         return await run_profile_tool(
             query=job_title,
-            query_field="job_title_query",
             ctx=ctx,
             action_name="job title LCA trends lookup",
             get_profile=lambda service: service.get_job_title_profile(job_title, logger=ctx),
@@ -89,11 +90,10 @@ def register_job_title_tools(mcp: FastMCP) -> None:
     async def get_h1b_job_title_salary(
         job_title: str,
         ctx: Context,
-    ) -> dict[str, Any]:
+    ) -> JobTitleSalariesResult:
         """Return annual H-1B salary summary rows for a job title."""
         return await run_profile_tool(
             query=job_title,
-            query_field="job_title_query",
             ctx=ctx,
             action_name="job title salary lookup",
             get_profile=lambda service: service.get_job_title_profile(job_title, logger=ctx),
