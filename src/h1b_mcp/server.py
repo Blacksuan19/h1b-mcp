@@ -5,11 +5,11 @@ from h1b_mcp.tools.job_titles import register_job_title_tools
 from h1b_mcp.tools.locations import register_location_tools
 
 INSTRUCTIONS = """
-Use this server for live H1BGrader sponsorship checks and profile views for
-companies, job titles, and locations. The server opens H1BGrader with
-SeleniumBase UC when a fresh profile is needed. Parsed profiles are cached
-locally and reused by later tool calls until stale. If H1BGrader presents human
-verification or a block page, report the Blocked result instead of guessing.
+Use this server to check H-1B sponsorship evidence for companies, job titles,
+and cities using H1BGrader profile data. Prefer focused tools for specific
+questions and full-profile tools only when broader reasoning needs the parsed
+profile. If H1BGrader requires human verification or blocks lookup, the tool
+raises an error instead of guessing.
 """.strip()
 
 mcp = FastMCP(name="h1b-mcp", instructions=INSTRUCTIONS)
