@@ -1,16 +1,26 @@
 [project]
 name = "h1b-mcp"
 version = "0.4.1"
-description = "A live browser-based MCP server for checking H1BGrader sponsorship signals."
+description = "A live browser-based MCP server for checking H-1B visa sponsorship signals."
 readme = "README.md"
 authors = [{ name = "blacksuan19", email = "py@aolabs.dev" }]
 license = "MIT"
 license-files = ["LICENSE"]
 requires-python = ">=3.11"
-keywords = ["h1b", "mcp", "codex", "seleniumbase", "visa", "sponsorship"]
+keywords = [
+    "agent",
+    "h1b",
+    "h1bgrader",
+    "mcp",
+    "mcp-server",
+    "seleniumbase",
+    "sponsorship",
+    "visa",
+]
 classifiers = [
-    "Development Status :: 3 - Alpha",
+    "Development Status :: 5 - Production/Stable",
     "Environment :: Console",
+    "Operating System :: OS Independent",
     "Intended Audience :: Developers",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.11",
@@ -18,6 +28,7 @@ classifiers = [
     "Programming Language :: Python :: 3.13",
     "Topic :: Internet :: WWW/HTTP :: Browsers",
     "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
     "Typing :: Typed",
 ]
 dependencies = ["beautifulsoup4>=4.15.0", "mcp>=1.28.1", "seleniumbase>=4.50.5"]
