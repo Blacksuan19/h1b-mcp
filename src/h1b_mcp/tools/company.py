@@ -9,6 +9,7 @@ from h1b_mcp.models import (
     CompanyRoleSponsorshipContextResult,
     CompanySalariesResult,
     CompanySponsorshipResult,
+    CompanyUSCISTrendsResult,
 )
 from h1b_mcp.responses.company import (
     build_company_grade_result,
@@ -18,6 +19,7 @@ from h1b_mcp.responses.company import (
     build_company_role_sponsorship_context_result,
     build_company_salaries_result,
     build_company_sponsorship_result,
+    build_company_uscis_trends_result,
 )
 from h1b_mcp.service import H1BGraderService
 from h1b_mcp.tools.common import CompanyQuery, JobTitleQuery, run_profile_tool, run_tool
@@ -127,6 +129,23 @@ def register_company_tools(mcp: FastMCP) -> None:
             action_name="company LCA trends lookup",
             get_profile=lambda service: service.get_company_profile(company_name, logger=ctx),
             transform=lambda company_profile: build_company_lca_trends_result(
+                company_query=company_name,
+                company_profile=company_profile,
+            ),
+        )
+
+    @mcp.tool()
+    async def get_company_uscis_trends(
+        company_name: CompanyQuery,
+        ctx: Context,
+    ) -> CompanyUSCISTrendsResult:
+        """Use to inspect an employer's annual USCIS approval and denial history."""
+        return await run_profile_tool(
+            query=company_name,
+            ctx=ctx,
+            action_name="company USCIS trends lookup",
+            get_profile=lambda service: service.get_company_profile(company_name, logger=ctx),
+            transform=lambda company_profile: build_company_uscis_trends_result(
                 company_query=company_name,
                 company_profile=company_profile,
             ),

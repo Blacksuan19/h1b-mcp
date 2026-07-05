@@ -7,6 +7,7 @@ from h1b_mcp.responses.company import (
     build_company_role_sponsorship_context_result,
     build_company_salaries_result,
     build_company_sponsorship_result,
+    build_company_uscis_trends_result,
 )
 from tests.fixtures import databricks_company_profile, machine_learning_engineer_profile
 
@@ -98,6 +99,21 @@ def test_build_company_lca_trends_result_returns_trend_rows() -> None:
     assert result.matched_company == "DATABRICKS INC"
     assert result.lca_approvals[0].fiscal_year == 2026
     assert result.lca_approval_rates[0].approval_rate == 100.0
+
+
+def test_build_company_uscis_trends_result_returns_trend_rows() -> None:
+    company_profile = databricks_company_profile()
+
+    result = build_company_uscis_trends_result(
+        company_query="Databricks",
+        company_profile=company_profile,
+    )
+
+    assert result.company_query == "Databricks"
+    assert result.matched_company == "DATABRICKS INC"
+    assert result.uscis_approvals[0].fiscal_year == 2026
+    assert result.uscis_approvals[1].counts["new_approvals"] == 70
+    assert result.uscis_approval_rates[1].approval_rate == 100.0
 
 
 def test_build_company_role_sponsorship_context_combines_company_and_market_data() -> None:

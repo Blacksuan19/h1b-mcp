@@ -52,6 +52,12 @@ class LCATrendsResultBase(BaseModel):
     lca_approval_rates: list[AnnualRateRow] = Field(default_factory=list)
 
 
+class USCISTrendsResultBase(BaseModel):
+    url: str | None = None
+    uscis_approvals: list[AnnualCountRow] = Field(default_factory=list)
+    uscis_approval_rates: list[AnnualRateRow] = Field(default_factory=list)
+
+
 class H1BLookupResult(SponsorshipResultBase):
     company_query: str
     matched_company: str | None = None
@@ -97,6 +103,11 @@ class CompanySalariesResult(SalariesResultBase):
 
 
 class CompanyLCATrendsResult(LCATrendsResultBase):
+    company_query: str
+    matched_company: str | None = None
+
+
+class CompanyUSCISTrendsResult(USCISTrendsResultBase):
     company_query: str
     matched_company: str | None = None
 

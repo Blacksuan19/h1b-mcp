@@ -70,6 +70,7 @@ async def test_mcp_server_lists_registered_tools(mcp_session: Any) -> None:
     assert "get_h1b_location_profile" in tool_names
     assert "get_company_role_sponsorship_context" in tool_names
     assert "get_company_lca_trends" in tool_names
+    assert "get_company_uscis_trends" in tool_names
     assert "get_h1b_job_title_lca_trends" in tool_names
     assert "get_h1b_location_lca_trends" in tool_names
     assert "get_h1b_job_title_employers" in tool_names
@@ -87,6 +88,7 @@ async def test_mcp_tools_expose_pydantic_output_schemas(mcp_session: Any) -> Non
         tools["get_company_role_sponsorship_context"].outputSchema["title"]
         == "CompanyRoleSponsorshipContextResult"
     )
+    assert tools["get_company_uscis_trends"].outputSchema["title"] == "CompanyUSCISTrendsResult"
     assert tools["get_h1b_job_title_profile"].outputSchema["title"] == "JobTitleProfile"
     assert tools["get_h1b_location_profile"].outputSchema["title"] == "LocationProfile"
 
@@ -104,6 +106,9 @@ async def test_mcp_tools_expose_agent_facing_descriptions(mcp_session: Any) -> N
     )
     assert tools["get_company_profile"].description == (
         "Use when answering requires the complete source-backed company profile."
+    )
+    assert tools["get_company_uscis_trends"].description == (
+        "Use to inspect an employer's annual USCIS approval and denial history."
     )
     assert tools["get_h1b_job_title_profile"].description == (
         "Use when answering requires the complete source-backed job-title profile."
@@ -175,6 +180,22 @@ async def test_mcp_company_lca_trends_tool_returns_structured_content(mcp_sessio
     assert result.structuredContent is not None
     assert result.structuredContent["company_query"] == "Databricks"
     assert result.structuredContent["lca_approvals"][0]["fiscal_year"] == 2026
+
+
+@pytest.mark.anyio
+async def test_mcp_company_uscis_trends_tool_returns_structured_content(
+    mcp_session: Any,
+) -> None:
+    result = await mcp_session.call_tool(
+        "get_company_uscis_trends",
+        {"company_name": "Databricks"},
+    )
+
+    assert not result.isError
+    assert result.structuredContent is not None
+    assert result.structuredContent["company_query"] == "Databricks"
+    assert result.structuredContent["uscis_approvals"][1]["counts"]["new_approvals"] == 70
+    assert result.structuredContent["uscis_approval_rates"][1]["approval_rate"] == 100.0
 
 
 @pytest.mark.anyio

@@ -39,17 +39,22 @@ sponsorship signals with structured evidence.
 | --- | --- | --- |
 | `check_h1b_sponsorship` | Classify company-level H-1B sponsorship evidence. | Compact signal, profile URL, and evidence. |
 | `check_company_job_sponsorship` | Check whether a company has sponsored evidence for a specific job title. | Exact/close/adjacent/company-only signal, matched titles, LCA counts, and salary ranges. |
+| `get_company_role_sponsorship_context` | Return company-specific and market-wide context for a role. | Company signal, company title matches, job-title market signal, latest market rows, and top market employers. |
 | `get_company_profile` | Return the full parsed company profile. | Cached profile metadata plus all parsed LCA, USCIS, salary, grade, and job-title data. |
 | `get_company_job_titles` | Return sponsored job titles for a company. | Job title, LCA count, max salary, average salary, and minimum salary. |
+| `get_company_lca_trends` | Return annual company LCA trend rows. | LCA approvals/denials and approval/denial rates by fiscal year. |
+| `get_company_uscis_trends` | Return annual company USCIS trend rows. | USCIS approvals/denials and approval/denial rates by fiscal year. |
 | `get_company_salaries` | Return annual H-1B salary history for a company. | Fiscal year, max salary, median salary, average salary, and minimum salary. |
 | `get_company_grade` | Return H1BGrader grade details for a company. | Latest grade, confidence, annual grades, and grade insight cards. |
 | `check_h1b_job_title_sponsorship` | Classify market-level H-1B sponsorship evidence for a job title. | Signal, evidence, latest LCA row, approval rate, salary row, and top employers. |
 | `get_h1b_job_title_profile` | Return the full parsed job-title profile. | Cached profile metadata plus parsed LCA, approval-rate, salary, and employer data. |
 | `get_h1b_job_title_employers` | Return top H-1B sponsoring employers for a job title. | Employer names and LCA filing counts. |
+| `get_h1b_job_title_lca_trends` | Return annual job-title LCA trend rows. | LCA approvals/denials and approval/denial rates by fiscal year. |
 | `get_h1b_job_title_salary` | Return annual H-1B salary history for a job title. | Fiscal year, max salary, median salary, average salary, and minimum salary. |
 | `check_h1b_location_sponsorship` | Classify city-level H-1B sponsorship evidence. | Signal, evidence, latest LCA row, approval rate, salary row, and top employers. |
 | `get_h1b_location_profile` | Return the full parsed city profile. | Cached profile metadata plus parsed LCA, approval-rate, salary, and employer data. |
 | `get_h1b_location_employers` | Return top H-1B sponsoring employers for a city. | Employer names and LCA filing counts. |
+| `get_h1b_location_lca_trends` | Return annual city LCA trend rows. | LCA approvals/denials and approval/denial rates by fiscal year. |
 | `get_h1b_location_salary` | Return annual H-1B salary history for a city. | Fiscal year, max salary, median salary, average salary, and minimum salary. |
 
 ## Quick Start
@@ -233,11 +238,6 @@ cached parsed H1BGrader profiles. It does not ship a bundled employer database
 or bulk scrape H1BGrader. H-1B source data is released periodically, so cached
 profile data is usually useful for repeated analysis rather than minute-by-minute
 freshness.
-
-## Roadmap
-
-- More granular profile slices for LCA trends and approval rates.
-- Combined profile lookups for role-specific sponsorship analysis.
 
 ## Troubleshooting
 

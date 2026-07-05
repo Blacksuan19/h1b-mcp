@@ -8,6 +8,7 @@ from h1b_mcp.models import (
     CompanyRoleSponsorshipContextResult,
     CompanySalariesResult,
     CompanySponsorshipResult,
+    CompanyUSCISTrendsResult,
     JobSponsorshipSignal,
     JobTitleMatch,
     JobTitleProfile,
@@ -104,6 +105,20 @@ def build_company_lca_trends_result(
         url=company_profile.url,
         lca_approvals=company_profile.profile.lca_approvals,
         lca_approval_rates=company_profile.profile.lca_approval_rates,
+    )
+
+
+def build_company_uscis_trends_result(
+    *,
+    company_query: str,
+    company_profile: CompanyProfile,
+) -> CompanyUSCISTrendsResult:
+    return CompanyUSCISTrendsResult(
+        company_query=company_query,
+        matched_company=company_profile.matched_name,
+        url=company_profile.url,
+        uscis_approvals=company_profile.profile.uscis_approvals,
+        uscis_approval_rates=company_profile.profile.uscis_approval_rates,
     )
 
 
