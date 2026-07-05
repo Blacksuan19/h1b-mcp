@@ -634,6 +634,28 @@ Run tests only:
 uv run pytest -q
 ```
 
+## Project Structure
+
+```text
+.
+├── .github/workflows/
+│   └── publish.yml              # Build, release, and PyPI publish workflow
+├── src/h1b_mcp/
+│   ├── h1bgrader/               # SeleniumBase browser client and lookup specs
+│   ├── matchers/                # Local matching helpers, such as job-title matching
+│   ├── models/                  # Pydantic profile, response, and error models
+│   ├── parsers/                 # H1BGrader table, grade, summary, and aggregate parsers
+│   ├── responses/               # Tool response builders for cached profiles
+│   ├── tools/                   # FastMCP tool registration by entity type
+│   ├── cache.py                 # Generic disk cache for parsed profiles
+│   ├── service.py               # Cache/fetch orchestration layer
+│   ├── server.py                # FastMCP server entrypoint
+│   └── settings.py              # Runtime paths, timeouts, and cache settings
+├── tests/                       # Parser, cache, response, and MCP server tests
+├── pyproject.toml               # Package metadata, dependencies, and tool config
+└── uv.lock                      # Locked dependency graph
+```
+
 ## Versioning
 
 Version bumps use `bumpver`:
