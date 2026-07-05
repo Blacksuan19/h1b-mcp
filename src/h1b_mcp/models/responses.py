@@ -12,14 +12,13 @@ from h1b_mcp.models.profile import (
     JobTitleRow,
 )
 
-SponsorSignal = Literal["Strong signal", "Mixed signal", "Weak signal", "No sponsor", "Blocked"]
+SponsorSignal = Literal["Strong signal", "Mixed signal", "Weak signal", "No sponsor"]
 JobSponsorshipSignal = Literal[
     "Exact title evidence",
     "Close title evidence",
     "Adjacent evidence",
     "Company-only evidence",
     "No evidence",
-    "Blocked",
 ]
 
 

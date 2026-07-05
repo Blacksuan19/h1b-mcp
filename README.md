@@ -18,7 +18,7 @@ sponsorship signals with structured evidence.
 
 - Live H1BGrader company, job-title, and location lookup through SeleniumBase UC mode.
 - Structured H-1B sponsor signal: `Strong signal`, `Mixed signal`,
-  `Weak signal`, `No sponsor`, or `Blocked`.
+  `Weak signal`, or `No sponsor`.
 - Parsed annual LCA approvals and denial counts.
 - Parsed annual LCA approval and denial rates.
 - Parsed annual USCIS H-1B approvals and denial counts.
@@ -30,8 +30,8 @@ sponsorship signals with structured evidence.
   trends, approval rates, and salary history.
 - Local caches so repeated checks can reuse parsed H1BGrader data.
 - Typed Pydantic response models that are easy for agents to consume.
-- Browser-block aware behavior that returns `Blocked` instead of inventing a
-  sponsor conclusion.
+- Browser-block aware behavior that raises a clear tool error instead of
+  inventing a sponsor conclusion.
 
 ## Included Tools
 
@@ -560,7 +560,7 @@ flowchart TD
     Z --> AA
 
     K --> AB{Cloudflare or lookup failure?}
-    AB -->|Blocked or failed| AC[Raise MCP tool error with clear message]
+    AB -->|Browser block or lookup failure| AC[Raise MCP tool error with clear message]
 ```
 
 </details>
@@ -584,13 +584,12 @@ flowchart TD
 | `Mixed signal` | The profile contains both sponsor and denial/no-sponsor indicators. |
 | `Weak signal` | The profile has limited sponsorship evidence. |
 | `No sponsor` | H1BGrader indicates the company is not a sponsor or no useful profile data was found. |
-| `Blocked` | Browser verification, a site block, timeout, or an unexpected live lookup failure prevented a reliable conclusion. |
 
 ## Browser Blocks
 
 H1BGrader may still present human verification, rate limits, or other bot
-protection. When that happens, `h1b-mcp` returns a `Blocked` result with a
-clear evidence message instead of making a claim from memory.
+protection. When that happens, `h1b-mcp` raises an MCP tool error with a clear
+message instead of making a claim from memory.
 
 The browser profile and caches are stored at:
 
@@ -615,7 +614,7 @@ freshness.
 | --- | --- |
 | First lookup is slow | Wait for SeleniumBase to prepare ChromeDriver and the browser profile. |
 | Tool times out | Increase your MCP client `tool_timeout_sec` to `300`. |
-| Response is `Blocked` | Retry later or verify manually on H1BGrader. The server intentionally avoids guessing. |
+| Tool reports a browser block or lookup error | Retry later or verify manually on H1BGrader. The server intentionally avoids guessing. |
 | Local server cannot start | Run `uv sync`, then retry `uv run h1b-mcp`. |
 
 ## Development
