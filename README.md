@@ -1,7 +1,7 @@
 # H1B MCP
 
-[![PyPI](https://img.shields.io/pypi/v/h1b-mcp.svg)](https://pypi.org/project/h1b-mcp/)
-[![Python](https://img.shields.io/pypi/pyversions/h1b-mcp.svg)](https://pypi.org/project/h1b-mcp/)
+[![PyPI](https://img.shields.io/pypi/v/h1b-mcp?label=pypi&cacheSeconds=300)](https://pypi.org/project/h1b-mcp/)
+[![Python](https://img.shields.io/pypi/pyversions/h1b-mcp?label=python&cacheSeconds=300)](https://pypi.org/project/h1b-mcp/)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Typed](https://img.shields.io/badge/typed-py.typed-green.svg)](src/h1b_mcp/py.typed)
 
