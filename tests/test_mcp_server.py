@@ -125,6 +125,17 @@ async def test_mcp_tools_expose_agent_facing_descriptions(mcp_session: Any) -> N
 
 
 @pytest.mark.anyio
+async def test_mcp_tools_expose_group_tags(mcp_session: Any) -> None:
+    result = await mcp_session.list_tools()
+    tools = {tool.name: tool for tool in result.tools}
+
+    assert tools["check_h1b_sponsorship"].meta == {"tags": ["company"]}
+    assert tools["get_company_uscis_trends"].meta == {"tags": ["company"]}
+    assert tools["get_h1b_job_title_profile"].meta == {"tags": ["job-title"]}
+    assert tools["get_h1b_location_profile"].meta == {"tags": ["location"]}
+
+
+@pytest.mark.anyio
 async def test_mcp_tools_expose_query_input_guidance(mcp_session: Any) -> None:
     result = await mcp_session.list_tools()
     tools = {tool.name: tool for tool in result.tools}

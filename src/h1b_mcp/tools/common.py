@@ -11,6 +11,10 @@ from h1b_mcp.settings import settings
 T = TypeVar("T", bound=BaseModel)
 TProfile = TypeVar("TProfile", bound=BaseModel)
 
+COMPANY_TOOL_META = {"tags": ["company"]}
+JOB_TITLE_TOOL_META = {"tags": ["job-title"]}
+LOCATION_TOOL_META = {"tags": ["location"]}
+
 CompanyQuery = Annotated[
     str,
     Field(

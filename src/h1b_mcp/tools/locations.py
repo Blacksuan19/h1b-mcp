@@ -13,13 +13,13 @@ from h1b_mcp.responses.aggregate import (
     build_location_salaries_result,
     build_location_sponsorship_result,
 )
-from h1b_mcp.tools.common import LocationQuery, run_profile_tool
+from h1b_mcp.tools.common import LOCATION_TOOL_META, LocationQuery, run_profile_tool
 
 
 def register_location_tools(mcp: FastMCP) -> None:
     """Register all location aggregate profile tools on a FastMCP server instance."""
 
-    @mcp.tool()
+    @mcp.tool(meta=LOCATION_TOOL_META)
     async def check_h1b_location_sponsorship(
         location: LocationQuery,
         ctx: Context,
@@ -36,7 +36,7 @@ def register_location_tools(mcp: FastMCP) -> None:
             ),
         )
 
-    @mcp.tool()
+    @mcp.tool(meta=LOCATION_TOOL_META)
     async def get_h1b_location_profile(
         location: LocationQuery,
         ctx: Context,
@@ -50,7 +50,7 @@ def register_location_tools(mcp: FastMCP) -> None:
             transform=lambda location_profile: location_profile,
         )
 
-    @mcp.tool()
+    @mcp.tool(meta=LOCATION_TOOL_META)
     async def get_h1b_location_employers(
         location: LocationQuery,
         ctx: Context,
@@ -69,7 +69,7 @@ def register_location_tools(mcp: FastMCP) -> None:
             ),
         )
 
-    @mcp.tool()
+    @mcp.tool(meta=LOCATION_TOOL_META)
     async def get_h1b_location_lca_trends(
         location: LocationQuery,
         ctx: Context,
@@ -86,7 +86,7 @@ def register_location_tools(mcp: FastMCP) -> None:
             ),
         )
 
-    @mcp.tool()
+    @mcp.tool(meta=LOCATION_TOOL_META)
     async def get_h1b_location_salary(
         location: LocationQuery,
         ctx: Context,

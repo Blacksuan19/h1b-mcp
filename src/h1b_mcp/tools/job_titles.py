@@ -13,13 +13,13 @@ from h1b_mcp.responses.aggregate import (
     build_job_title_salaries_result,
     build_job_title_sponsorship_result,
 )
-from h1b_mcp.tools.common import JobTitleQuery, run_profile_tool
+from h1b_mcp.tools.common import JOB_TITLE_TOOL_META, JobTitleQuery, run_profile_tool
 
 
 def register_job_title_tools(mcp: FastMCP) -> None:
     """Register all job-title aggregate profile tools on a FastMCP server instance."""
 
-    @mcp.tool()
+    @mcp.tool(meta=JOB_TITLE_TOOL_META)
     async def check_h1b_job_title_sponsorship(
         job_title: JobTitleQuery,
         ctx: Context,
@@ -36,7 +36,7 @@ def register_job_title_tools(mcp: FastMCP) -> None:
             ),
         )
 
-    @mcp.tool()
+    @mcp.tool(meta=JOB_TITLE_TOOL_META)
     async def get_h1b_job_title_profile(
         job_title: JobTitleQuery,
         ctx: Context,
@@ -50,7 +50,7 @@ def register_job_title_tools(mcp: FastMCP) -> None:
             transform=lambda job_title_profile: job_title_profile,
         )
 
-    @mcp.tool()
+    @mcp.tool(meta=JOB_TITLE_TOOL_META)
     async def get_h1b_job_title_employers(
         job_title: JobTitleQuery,
         ctx: Context,
@@ -69,7 +69,7 @@ def register_job_title_tools(mcp: FastMCP) -> None:
             ),
         )
 
-    @mcp.tool()
+    @mcp.tool(meta=JOB_TITLE_TOOL_META)
     async def get_h1b_job_title_lca_trends(
         job_title: JobTitleQuery,
         ctx: Context,
@@ -86,7 +86,7 @@ def register_job_title_tools(mcp: FastMCP) -> None:
             ),
         )
 
-    @mcp.tool()
+    @mcp.tool(meta=JOB_TITLE_TOOL_META)
     async def get_h1b_job_title_salary(
         job_title: JobTitleQuery,
         ctx: Context,

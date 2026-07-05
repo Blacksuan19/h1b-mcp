@@ -22,13 +22,19 @@ from h1b_mcp.responses.company import (
     build_company_uscis_trends_result,
 )
 from h1b_mcp.service import H1BGraderService
-from h1b_mcp.tools.common import CompanyQuery, JobTitleQuery, run_profile_tool, run_tool
+from h1b_mcp.tools.common import (
+    COMPANY_TOOL_META,
+    CompanyQuery,
+    JobTitleQuery,
+    run_profile_tool,
+    run_tool,
+)
 
 
 def register_company_tools(mcp: FastMCP) -> None:
     """Register all company-profile-backed tools on a FastMCP server instance."""
 
-    @mcp.tool()
+    @mcp.tool(meta=COMPANY_TOOL_META)
     async def check_h1b_sponsorship(
         company_name: CompanyQuery,
         ctx: Context,
@@ -45,7 +51,7 @@ def register_company_tools(mcp: FastMCP) -> None:
             ),
         )
 
-    @mcp.tool()
+    @mcp.tool(meta=COMPANY_TOOL_META)
     async def check_company_job_sponsorship(
         company_name: CompanyQuery,
         job_title: JobTitleQuery,
@@ -64,7 +70,7 @@ def register_company_tools(mcp: FastMCP) -> None:
             ),
         )
 
-    @mcp.tool()
+    @mcp.tool(meta=COMPANY_TOOL_META)
     async def get_company_profile(company_name: CompanyQuery, ctx: Context) -> CompanyProfile:
         """Use when answering requires the complete source-backed company profile."""
         return await run_profile_tool(
@@ -75,7 +81,7 @@ def register_company_tools(mcp: FastMCP) -> None:
             transform=lambda company_profile: company_profile,
         )
 
-    @mcp.tool()
+    @mcp.tool(meta=COMPANY_TOOL_META)
     async def get_company_role_sponsorship_context(
         company_name: CompanyQuery,
         job_title: JobTitleQuery,
@@ -100,7 +106,7 @@ def register_company_tools(mcp: FastMCP) -> None:
             action=action,
         )
 
-    @mcp.tool()
+    @mcp.tool(meta=COMPANY_TOOL_META)
     async def get_company_job_titles(
         company_name: CompanyQuery,
         ctx: Context,
@@ -117,7 +123,7 @@ def register_company_tools(mcp: FastMCP) -> None:
             ),
         )
 
-    @mcp.tool()
+    @mcp.tool(meta=COMPANY_TOOL_META)
     async def get_company_lca_trends(
         company_name: CompanyQuery,
         ctx: Context,
@@ -134,7 +140,7 @@ def register_company_tools(mcp: FastMCP) -> None:
             ),
         )
 
-    @mcp.tool()
+    @mcp.tool(meta=COMPANY_TOOL_META)
     async def get_company_uscis_trends(
         company_name: CompanyQuery,
         ctx: Context,
@@ -151,7 +157,7 @@ def register_company_tools(mcp: FastMCP) -> None:
             ),
         )
 
-    @mcp.tool()
+    @mcp.tool(meta=COMPANY_TOOL_META)
     async def get_company_salaries(
         company_name: CompanyQuery,
         ctx: Context,
@@ -168,7 +174,7 @@ def register_company_tools(mcp: FastMCP) -> None:
             ),
         )
 
-    @mcp.tool()
+    @mcp.tool(meta=COMPANY_TOOL_META)
     async def get_company_grade(company_name: CompanyQuery, ctx: Context) -> CompanyGradeResult:
         """Use to inspect an employer's H1BGrader grade and grading factors."""
         return await run_profile_tool(
